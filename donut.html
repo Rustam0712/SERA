@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>График суточной добычи</title>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 30px;
+      background: #0d1c2c;
+      color: #e0e0e0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #ffffff;
+    }
+
+    label {
+      color: #e0e0e0;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    #file-input {
+      margin-bottom: 15px;
+    }
+
+    button {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #155ab6;
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background-color: #1e2e3e;
+      color: #ffffff;
+    }
+
+    #chart_div {
+      background: #1e2e3e;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+
+<body>
+  <h1>График суточной добычи</h1>
+
+  <label for="file-input">Выберите Excel-файл (только лист "Сера"):</label><br>
+  <input type="file" id="file-input" accept=".xlsx, .xls"><br><br>
+
+  <div class="controls">
+    <button id="upload-btn">Построить график</button>
+    <button class="category-btn" data-category="Ишлаб чиқариш">Ишлаб чиқариш</button>
+    <button class="category-btn" data-category="Биржага юклаш">Биржага юклаш</button>
+    <button class="category-btn" data-category="Экспорт">Экспорт</button>
+
+    <select id="company-select">
+      <option value="Общий">Общий</option>
+      <option>SANEG МЧЖ</option>
+      <option>Муборак ГҚИЗ</option>
+      <option>Шўртан НГҚЧБ</option>
+      <option>Шўртан ГКМ МЧЖ</option>
+      <option>Бухоро НҚИЗ МЧЖ</option>
+      <option>LUKOIL МЧЖ</option>
+      <option>New silk road oil & gas МЧЖ</option>
+    </select>
+  </div>
+
+  <div id="chart_div" style="width: 100%; height: 500px; margin-top: 40px;"></div>
+
+  <script>
+    google.charts.load('current', { packages: ['corechart'] });
+
+    let json = [];
+    let lastFilledDate = null;
+
+    document.getElementById('upload-btn').addEventListener('click', () => {
+      const input = document.getElementById('file-input');
+      if (!input.files.length) {
+        alert('Пожалуйста, выберите файл Excel.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const sheet = workbook.Sheets['Сера'];
+        if (!sheet) {
+          alert("Лист 'Сера' не найден в Excel-файле.");
+          return;
+        }
+
+        json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        lastFilledDate = null;
+
+        // Отрисовать график как раньше
+        drawChart(filterData("Общий", null));
+      };
+
+      reader.readAsArrayBuffer(input.files[0]);
+    });
+
+    document.querySelectorAll('.category-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const category = button.dataset.category;
+        const company = document.getElementById('company-select').value;
+        const { map2024, map2025 } = filterData(company, category);
+        drawChart({ map2024, map2025 });
+      });
+    });
+
+    function filterData(companyFilter, categoryFilter) {
+      const map2025 = new Map();
+      const map2024 = new Map();
+      lastFilledDate = null;
+
+      for (let i = 1; i < json.length; i += 21) {
+        const row = json[i];
+        if (!row || !row[0]) continue;
+
+        const excelDate = row[0];
+        const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+        if (isNaN(dateCell)) continue;
+
+        let sum2025 = 0;
+        let sum2024 = 0;
+
+        for (let j = 0; j < 21; j++) {
+          const current = json[i + j];
+          const company = current?.[1];
+          const category = current?.[3];
+          const value2025 = current?.[7];
+          const value2024 = current?.[5];
+
+          if (
+            (companyFilter === "Общий" || company === companyFilter) &&
+            (!categoryFilter || category === categoryFilter)
+          ) {
+            const n25 = typeof value2025 === 'number' ? value2025 : parseFloat(value2025);
+            if (!isNaN(n25)) sum2025 += n25;
+
+            const n24 = typeof value2024 === 'number' ? value2024 : parseFloat(value2024);
+            if (!isNaN(n24)) sum2024 += n24;
+          }
+        }
+
+        if (sum2025 > 0 || sum2024 > 0) {
+          const key = `${dateCell.getMonth() + 1}-${dateCell.getDate()}`;
+          if (sum2025 > 0) map2025.set(key, sum2025);
+          if (sum2024 > 0) map2024.set(key, sum2024);
+          lastFilledDate = dateCell;
+        }
+      }
+
+      console.log("Фильтр:", companyFilter, categoryFilter);
+      console.log("2025:", map2025);
+      console.log("2024:", map2024);
+
+      return { map2024, map2025 };
+    }
+
+    function drawChart({ map2024, map2025 }) {
+      const chartData = [['Дата', '2024', '2025']];
+
+      for (let m = 1; m <= 12; m++) {
+        for (let d = 1; d <= 31; d++) {
+          const key = `${m}-${d}`;
+          const val2024 = map2024.has(key) ? map2024.get(key) : null;
+          const val2025 = map2025.has(key) ? map2025.get(key) : null;
+
+          if (val2024 !== null || val2025 !== null) {
+            const date = new Date(2025, m - 1, d);
+            if (!lastFilledDate || date <= lastFilledDate) {
+              chartData.push([date, val2024 ?? 0, val2025 ?? 0]);
+            }
+          }
+        }
+      }
+
+      const data = google.visualization.arrayToDataTable(chartData);
+
+      const options = {
+        title: 'Сравнение суточной добычи за 2024 и 2025 гг.',
+        curveType: 'function',
+        legend: { position: 'bottom' },
+        hAxis: {
+          title: 'Дата',
+          format: 'MMM dd',
+          gridlines: { count: 12 }
+        },
+        vAxis: {
+          title: 'Объём (тонн)'
+        },
+        colors: ['#dc3912', '#3366cc'],
+        animation: {
+          duration: 1000,
+          easing: 'out',
+          startup: true
+        }
+      };
+
+      const chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+    }
+  </script>
+</body>
+
+</html>

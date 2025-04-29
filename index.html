@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard UI</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- В HEAD -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+
+</head>
+
+<body>
+  <div class="dashboard">
+    <div class="top-bar">
+      <img src="Снимок экрана 2025-04-18 174333.png" alt="logo" class="logo">
+      <p class="tit">ОЛТИНГУГУРТ ИШЛАБ ЧИКАРИШ ВА ИСТЕЬМОЛЧИЛАРГА ЕТКАЗИБ БЕРИШ КУРСАТКИЧЛАР</p>
+      <img src="user.png" class="calendar" alt="userimg"></img>
+    </div>
+    
+
+    <div class="left-panel">
+      <div class="checkbox-group">
+        <div class="checkcon">
+          <button class="checkbox"></button>
+          <p style="text-align: center;">Республика жами</p>
+        </div>
+
+        <div class="checkcon">
+          <button class="checkbox"></button>
+          <p style="text-align: center;">Uzbekneftegaz</p>
+        </div>
+
+        <div class="checkcon">
+          <button class="checkbox"></button>
+          <p style="text-align: center;">ХК ва К корхоналар</p>
+        </div>
+      </div>
+
+      <div class="icon-section">
+        <div class="icon-block">
+          <img src="Рисунок1.png" alt="logo" class="icon">
+          <div class="left-box">
+            <p>Куш бошида колдик</p>
+            <p id="left-box-result">0</p>
+          </div>
+        </div>
+        <div class="icon-block">
+          <img src="Рисунок2.png" alt="" class="icon">
+          <div class="left-box">
+            <button class="category-btn dobichabtn" data-category="Ишлаб чиқариш">Ишлаб чикариш</button>
+            <p id="sum-text" data-cell="K2">0</p>
+          </div>
+        </div>
+        <div class="icon-block">
+          <img src="Рисунок3.png" alt="" class="icon">
+          <div class="left-box">
+            <button class="category-btn dobichabtn" data-category="Биржага юклаш">Юклаш</button>
+            <p id="left-box-result" data-cell="L2">0</p>
+          </div>
+        </div>
+        <div class="icon-block">
+          <!-- <img src="Рисунок3.png" alt="" class="icon"> -->
+          <div class="left-box">
+            <button class="category-btn dobichabtn" data-category="Экспорт">Экспорт</button>
+            <p id="left-box-result" data-cell="L2">0</p>
+          </div>
+        </div>
+        <div class="icon-block">
+          <img src="Рисунок4.png" alt="" class="icon">
+          <div class="left-box">
+            <p>Технологик юкотиш</p>
+            <p id="left-box-result" data-cell="M2">0</p>
+          </div>
+        </div>
+        <div class="icon-block">
+          <img src="Рисунок5.png" alt="" class="icon">
+          <div class="left-box">
+            <p>Кун охирида колдик</p>
+            <p id="left-box-result" data-cell="N2">0</p>
+          </div>
+        </div>
+      </div>
+
+
+
+      <a class="newinfo" id="updateButton" href="edit.html">
+        Малумот юклаш
+      </a>
+    </div>
+
+    <div class="main-panel">
+      <div class="card dropdown">
+        <div class="tablebox" id="last-day-btn" style="cursor: pointer;">
+            Кунлик
+        </div>
+        <table class="production-table">
+            <thead>
+                <tr>
+                    <th>Режа</th>
+                    <th>Амалда</th>
+                    <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="day-plan">0</td>
+                    <td id="day-actual">0</td>
+                    <td id="day-mid">0</td> <!-- Значение Mid для дня -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="card dropdown">
+        <div class="tablebox" id="last-month-btn" style="cursor: pointer;">
+            Ой бошидан
+        </div>
+        <table class="production-table">
+            <thead>
+                <tr>
+                    <th>Режа</th>
+                    <th>Амалда</th>
+                    <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="month-plan">0</td>
+                    <td id="month-actual">0</td>
+                    <td id="month-mid">0</td> <!-- Значение Mid для месяца -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="card dropdown">
+        <div class="tablebox" id="last-year-btn" style="cursor: pointer;">
+            Йил бошидан
+        </div>
+        <table class="production-table">
+            <thead>
+                <tr>
+                    <th>Режа</th>
+                    <th>Амалда</th>
+                    <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="year-plan">0</td>
+                    <td id="year-actual">0</td>
+                    <td id="year-mid">0</td> <!-- Значение Mid для года -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+      
+
+      <div class="calendar-container" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+        <label for="datePicker" style="font-weight: bold;">Таъриф санаси:</label>
+        <input type="text" id="datePicker" placeholder="Кунни танланг..."
+          style="padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc;">
+      </div>
+
+      <!-- <div class="table-title">Заводлар кесимида ишлаб чиқариш кўрсаткичлари</div> -->
+      <table class="factory-table">
+        <thead>
+          <tr>
+            <th>Корхона номи</th>
+            <th>Олдинги кун амалда</th>
+            <th>Режа</th>
+            <th>Амалда</th>
+            <th>+/-</th>
+            <th>+/- олдинги кун</th>
+          </tr>
+        </thead>
+        <tbody id="dataTable">
+          <tr>
+            <td>Муборак заводи</td>
+            <td data-cell="B1"></td>
+            <td data-cell="C1"></td>
+            <td data-cell="D1"></td>
+            <td data-cell="E1"></td>
+            <td data-cell="F1"></td>
+          </tr>
+          <tr>
+            <td>Шўртан НГЧБ</td>
+            <td data-cell="B2"></td>
+            <td data-cell="C2"></td>
+            <td data-cell="D2"></td>
+            <td data-cell="E2"></td>
+            <td data-cell="F2"></td>
+          </tr>
+          <tr>
+            <td>Шўртан ГКМ</td>
+            <td data-cell="B3"></td>
+            <td data-cell="C3"></td>
+            <td data-cell="D3"></td>
+            <td data-cell="E3"></td>
+            <td data-cell="F3"></td>
+          </tr>
+          <tr>
+            <td>Бухоро НКИЗ</td>
+            <td data-cell="B4"></td>
+            <td data-cell="C4"></td>
+            <td data-cell="D4"></td>
+            <td data-cell="E4"></td>
+            <td data-cell="F4"></td>
+          </tr>
+          <tr>
+            <td>Лукойл</td>
+            <td data-cell="B5"></td>
+            <td data-cell="C5"></td>
+            <td data-cell="D5"></td>
+            <td data-cell="E5"></td>
+            <td data-cell="F5"></td>
+          </tr>
+          <tr>
+            <td>NSROG</td>
+            <td data-cell="B6"></td>
+            <td data-cell="C6"></td>
+            <td data-cell="D6"></td>
+            <td data-cell="E6"></td>
+            <td data-cell="F6"></td>
+          </tr>
+          <tr>
+            <td>SANEG</td>
+            <td data-cell="B7"></td>
+            <td data-cell="C7"></td>
+            <td data-cell="D7"></td>
+            <td data-cell="E7"></td>
+            <td data-cell="F7"></td>
+          </tr>
+
+          <!-- добавляй столько строк, сколько нужно -->
+        </tbody>
+      </table>
+      <div class="circle-chart">
+        <h3>Олтингугурт ишлаб чикариш улуши</h3>
+        <div class="donut">
+          <div class="hole"></div>
+          <p class="left" contenteditable="false" id="uzbekneftgaz-summary">800</p>
+          <p class="center">1200</p>
+          <p class="ton">ТОННА</p>
+          <p class="right" contenteditable="false" id="other-summary">500</p>
+        </div>
+
+        <!-- <div class="ung">UNG</div> -->
+
+        <img src="Removal-595.png" alt="logos" class="imagelogos">
+      </div>
+      <div class="btn-con">
+        <button id="upload-btn">Построить график</button>
+        <button class="category-btn" data-category="Экспорт">Экспорт</button>
+
+        <input type="file" id="file-input" accept=".xlsx, .xls"><br><br>
+
+        <!-- Календарь для выбора даты -->
+        <input type="text" id="date-picker" placeholder="Выберите дату" />
+
+
+
+        <select id="company-select">
+          <option value="Общий">Общий</option>
+          <option>SANEG МЧЖ</option>
+          <option>Муборак ГҚИЗ</option>
+          <option>Шўртан НГҚЧБ</option>
+          <option>Шўртан ГКМ МЧЖ</option>
+          <option>Бухоро НҚИЗ МЧЖ</option>
+          <option>LUKOIL МЧЖ</option>
+          <option>New silk road oil & gas МЧЖ</option>
+        </select>
+      </div>
+      <div class="line-chart"></div>
+
+    </div>
+
+    <div class="chart-box">
+
+
+      <div class="controls">
+
+
+
+      </div>
+
+      <div id="chart_div" style="width: 100%; height: 500px; margin-top: 40px;"></div>
+    </div>
+    
+    <script src="script.js"></script>
+    <script src="editScript.js"></script>
+    <script src="chartScript.js"></script>ы
+</body>
+
+</html>

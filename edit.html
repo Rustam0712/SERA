@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование информации</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <div id="container">
+        <h1>Редактирование таблицы</h1>
+
+        <!-- Кнопка для импорта данных из Excel -->
+        <input type="file" id="excelFile" accept=".xlsx,.xls" />
+        <button id="importButton">Импорт</button>
+
+        <!-- Форма для редактирования таблицы -->
+        <table class="factory-table">
+            <thead>
+                <tr>
+                    <th>Корхона номи</th>
+                    <th>Олдинги кун амалда</th>
+                    <th>Режа</th>
+                    <th>Амалда</th>
+                    <th>+/-</th>
+                    <th>+/- олдинги кун</th>
+                </tr>
+            </thead>
+            <tbody id="editTable">
+                <!-- Данные загружаются через JavaScript -->
+            </tbody>
+        </table>
+
+        <button id="saveButton">Сохранить изменения</button>
+        <a href="index.html"><button>Вернуться на главную</button></a>
+        <p id="test"></p>
+    </div>
+
+    <script src="editScript.js"></script>
+</body>
+</html>
