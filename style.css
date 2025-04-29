@@ -424,7 +424,7 @@ button.newinfo:hover {
     
     position: absolute;
     margin-top: 120px;
-    width: 1252px;
+    width: 1258px;
     height: 250px;
 }
 
@@ -468,10 +468,17 @@ button:hover {
 
 .circle-chart h3 {
   position: absolute;
-  /* top: 0; */
+  top: 170px;
   z-index: 1;
-  padding-bottom: 720px;
-  /* border: 1px solid white; */
+  border-bottom: 2px solid white;
+  width: 400px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* background-color: black; */
+
 }
 
 .imagelogos {

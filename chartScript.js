@@ -86,20 +86,20 @@ document.getElementById('upload-btn').addEventListener('click', () => {
     reader.onload = function (e) {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-    
+
         const sheet = workbook.Sheets['Сера'];
         if (!sheet) {
             alert("Лист 'Сера' не найден в Excel-файле.");
             return;
         }
-    
+
         json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         lastFilledDate = null;
-    
+
         drawChart(filterData("Общий", null, null));
         updateSummaries(); // <<< ВОТ ЭТО ОБЯЗАТЕЛЬНО ДОБАВЬ
     };
-    
+
 
     reader.readAsArrayBuffer(input.files[0]);
 });
@@ -296,4 +296,30 @@ let totalSum = 0;
 for (let value of map2025.values()) {
     totalSum += value;
 }
+
+//Сумма "Кун бошида колдик"
 document.getElementById('sum-text').innerText = `Сумма за 2025: ${totalSum.toFixed(2)}`;
+
+// 🔽 Дополнительно: Сумма чисел из колонки S (индекс 18) за последний день
+let sColumnSum = 0;
+for (let i = 1; i < json.length; i++) {
+    const row = json[i];
+    if (!row || !row[0]) continue;
+
+    const excelDate = row[0];
+    const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+    if (isNaN(dateCell)) continue;
+
+    if (
+        dateCell.getDate() === lastFilledDate.getDate() &&
+        dateCell.getMonth() === lastFilledDate.getMonth() &&
+        dateCell.getFullYear() === lastFilledDate.getFullYear()
+    ) {
+        const val = parseFloat(row[18]);
+        if (!isNaN(val)) {
+            sColumnSum += val;
+        }
+    }
+}
+
+document.getElementById('s-column-sum').innerText = `Сумма по колонке S за ${lastFilledDate.toLocaleDateString('ru-RU')}: ${sColumnSum.toFixed(2)}`;
