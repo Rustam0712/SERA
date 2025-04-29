@@ -520,7 +520,7 @@ label {
   margin-top: -350px;
   /* border: 1px solid white; */
   position: absolute;
-  top: 87%;
+  top: 78%;
   z-index: 9;
   margin-left: 10px;
 }
@@ -552,10 +552,10 @@ select {
   flex-direction: column;
   /* border: 2px solid white;;s */
   position: absolute;
-  top: 48%;
+  top: 52%;
   width: 1225px;
   left: 12.5%;
-  height: 450px;
+  height: 470px;
 }
 
 .controls {

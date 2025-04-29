@@ -205,7 +205,7 @@ function drawChart({ map2024, map2025 }) {
     const data = google.visualization.arrayToDataTable(chartData);
 
     const options = {
-        title: ' ',
+        title: 'Сравнение суточной добычи за 2024 и 2025 гг.',
         curveType: 'function',
         legend: {
             position: 'bottom',
