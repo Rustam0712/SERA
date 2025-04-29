@@ -98,6 +98,215 @@ document.getElementById('upload-btn').addEventListener('click', () => {
 
         drawChart(filterData("Общий", null, null));
         updateSummaries(); // <<< ВОТ ЭТО ОБЯЗАТЕЛЬНО ДОБАВЬ
+
+
+        //-------------------------------------->
+        // 👉 Считаем сумму после загрузки файла
+        if (lastFilledDate) {
+            let sColumnSum = 0;
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (!row || !row[0]) continue;
+
+                const excelDate = row[0];
+                const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+                if (isNaN(dateCell)) continue;
+
+                if (
+                    dateCell.getDate() === lastFilledDate.getDate() &&
+                    dateCell.getMonth() === lastFilledDate.getMonth() &&
+                    dateCell.getFullYear() === lastFilledDate.getFullYear()
+                ) {
+                    const val = parseFloat(row[18]);
+                    if (!isNaN(val)) {
+                        sColumnSum += val;
+                    }
+                }
+            }
+
+            document.getElementById('s-column-sum').innerText = `${sColumnSum.toFixed(2)}`;
+            console.log(sColumnSum.toFixed(2));
+        }
+
+
+
+        if (lastFilledDate) {
+            let sColumnSum = 0;
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (!row || !row[0]) continue;
+
+                const excelDate = row[0];
+                const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+                if (isNaN(dateCell)) continue;
+
+                if (
+                    dateCell.getDate() === lastFilledDate.getDate() &&
+                    dateCell.getMonth() === lastFilledDate.getMonth() &&
+                    dateCell.getFullYear() === lastFilledDate.getFullYear()
+                ) {
+                    const val = parseFloat(row[19]);
+                    if (!isNaN(val)) {
+                        sColumnSum += val;
+                    }
+                }
+            }
+
+            document.getElementById('s-column-sum1').innerText = `${sColumnSum.toFixed(2)}`;
+            console.log(sColumnSum.toFixed(2));
+        }
+
+
+
+
+        if (lastFilledDate) {
+            let sColumnSum = 0;
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (!row || !row[0]) continue;
+
+                const excelDate = row[0];
+                const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+                if (isNaN(dateCell)) continue;
+
+                if (
+                    dateCell.getDate() === lastFilledDate.getDate() &&
+                    dateCell.getMonth() === lastFilledDate.getMonth() &&
+                    dateCell.getFullYear() === lastFilledDate.getFullYear()
+                ) {
+                    const val = parseFloat(row[20]);
+                    if (!isNaN(val)) {
+                        sColumnSum += val;
+                    }
+                }
+            }
+
+            document.getElementById('s-column-sum2').innerText = `${sColumnSum.toFixed(2)}`;
+            console.log(sColumnSum.toFixed(2));
+        }
+
+
+        if (lastFilledDate) {
+            let ishlabChiqarishSum = 0;
+            let birjagaYuklashSum = 0;
+            let eksportSum = 0;
+
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (!row || !row[0]) continue;
+
+                const excelDate = row[0];
+                const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+                if (isNaN(dateCell)) continue;
+
+                // Только за последний заполненный день
+                if (
+                    dateCell.getDate() === lastFilledDate.getDate() &&
+                    dateCell.getMonth() === lastFilledDate.getMonth() &&
+                    dateCell.getFullYear() === lastFilledDate.getFullYear()
+                ) {
+                    const category = row[3];
+                    const value = parseFloat(row[7]); // колонка H
+
+                    if (category === "Ишлаб чиқариш" && !isNaN(value)) {
+                        ishlabChiqarishSum += value;
+                    }
+
+                    if (category === "Биржага юклаш" && !isNaN(value)) {
+                        birjagaYuklashSum += value;
+                    }
+                    if (category === "Экспорт" && !isNaN(value)) {
+                        eksportSum += value;
+                    }
+                }
+            }
+
+            document.getElementById('sum-text').innerText = `${ishlabChiqarishSum.toFixed(2)}`;
+            document.getElementById('sum-text1').innerText = `${birjagaYuklashSum.toFixed(2)}`;
+            document.getElementById('sum-text2').innerText = `${eksportSum.toFixed(2)}`;
+            console.log("Ишлаб чиқариш сумма:", ishlabChiqarishSum);
+            console.log("Биржага юклаш сумма:", birjagaYuklashSum);
+            console.log("Экспорт:", eksportSum);
+        }
+
+
+        let uzbekneftgazSum = 0;
+        let otherSum = 0;
+
+        for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            if (!row || !row[2] || !row[3]) continue;
+
+            const company = row[2]; // колонка C
+            const category = row[3]; // колонка D
+            const value = parseFloat(row[7]); // колонка H
+
+            if (category === "Ишлаб чиқариш" && !isNaN(value)) {
+                if (company === "Ўзбекнефтгаз") {
+                    uzbekneftgazSum += value;
+                } else {
+                    otherSum += value;
+                }
+            }
+        }
+
+        document.getElementById('uzbekneftgazsum').innerText = `${uzbekneftgazSum.toFixed(0)}`;
+        document.getElementById('other-sum').innerText = `${otherSum.toFixed(0)}`;
+        console.log("Ўзбекнефтгаз сумма:", uzbekneftgazSum);
+        console.log("Бошқа компаниялар сумма:", otherSum);
+
+
+
+        //--------------------------< ТАБЛИЦА FACTORY-TABLE >------------------------------------------//
+
+
+        let lastDate = "";
+        for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            const date = row[0];
+            if (date) lastDate = date;
+        }
+
+        let companiesSet = new Set();
+        for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            if (row[0] === lastDate && row[1]) {
+                companiesSet.add(row[1]);
+            }
+        }
+
+        let companies = Array.from(companiesSet);
+        let tableRows = "";
+
+        companies.forEach(company => {
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (row[1] === company) {
+                    const colF = row[5] || "";
+                    const colG = row[6] || "";
+                    const colH = row[7] || "";
+                    const colQ = row[16] || "";
+                    const colR = row[17] || "";
+
+                    tableRows += `
+                <tr>
+                    <td>${company}</td>
+                    <td>${colF}</td>
+                    <td>${colG}</td>
+                    <td>${colH}</td>
+                    <td>${colQ}</td>
+                    <td>${colR}</td>
+                </tr>
+            `;
+                    break;
+                }
+            }
+        });
+
+        document.getElementById("company-table-body").innerHTML = tableRows;
+
+
+
     };
 
 
@@ -298,28 +507,5 @@ for (let value of map2025.values()) {
 }
 
 //Сумма "Кун бошида колдик"
-document.getElementById('sum-text').innerText = `Сумма за 2025: ${totalSum.toFixed(2)}`;
+document.getElementById('sum-text').innerText = `${totalSum.toFixed(2)}`;
 
-// 🔽 Дополнительно: Сумма чисел из колонки S (индекс 18) за последний день
-let sColumnSum = 0;
-for (let i = 1; i < json.length; i++) {
-    const row = json[i];
-    if (!row || !row[0]) continue;
-
-    const excelDate = row[0];
-    const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
-    if (isNaN(dateCell)) continue;
-
-    if (
-        dateCell.getDate() === lastFilledDate.getDate() &&
-        dateCell.getMonth() === lastFilledDate.getMonth() &&
-        dateCell.getFullYear() === lastFilledDate.getFullYear()
-    ) {
-        const val = parseFloat(row[18]);
-        if (!isNaN(val)) {
-            sColumnSum += val;
-        }
-    }
-}
-
-document.getElementById('s-column-sum').innerText = `Сумма по колонке S за ${lastFilledDate.toLocaleDateString('ru-RU')}: ${sColumnSum.toFixed(2)}`;

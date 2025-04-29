@@ -55,35 +55,35 @@
           <img src="Рисунок2.png" alt="" class="icon">
           <div class="left-box">
             <button class="category-btn dobichabtn" data-category="Ишлаб чиқариш">Ишлаб чикариш</button>
-            <p id="sum-text" data-cell="K2">0</p>
+            <p id="sum-text">0</p>
           </div>
         </div>
         <div class="icon-block">
           <img src="Рисунок3.png" alt="" class="icon">
           <div class="left-box">
             <button class="category-btn dobichabtn" data-category="Биржага юклаш">Юклаш</button>
-            <p id="left-box-result" data-cell="L2">0</p>
+            <p id="sum-text1">0</p>
           </div>
         </div>
         <div class="icon-block">
           <img src="uzexlogo.png" alt="" class="icon">
           <div class="left-box">
             <button class="category-btn dobichabtn" data-category="Экспорт">Экспорт</button>
-            <p id="left-box-result" data-cell="L2">0</p>
+            <p id="sum-text2">0</p>
           </div>
         </div>
         <div class="icon-block">
           <img src="Рисунок4.png" alt="" class="icon">
           <div class="left-box">
             <p>Технологик юкотиш</p>
-            <p id="left-box-result" data-cell="M2">0</p>
+            <p id="s-column-sum2">0</p>
           </div>
         </div>
         <div class="icon-block">
           <img src="Рисунок5.png" alt="" class="icon">
           <div class="left-box">
             <p>Кун охирида колдик</p>
-            <p id="left-box-result" data-cell="N2">0</p>
+            <p id="s-column-sum1">0</p>
           </div>
         </div>
       </div>
@@ -182,75 +182,22 @@
             <th>+/- олдинги кун</th>
           </tr>
         </thead>
-        <tbody id="dataTable">
-          <tr>
-            <td>Муборак заводи</td>
-            <td data-cell="B1"></td>
-            <td data-cell="C1"></td>
-            <td data-cell="D1"></td>
-            <td data-cell="E1"></td>
-            <td data-cell="F1"></td>
-          </tr>
-          <tr>
-            <td>Шўртан НГЧБ</td>
-            <td data-cell="B2"></td>
-            <td data-cell="C2"></td>
-            <td data-cell="D2"></td>
-            <td data-cell="E2"></td>
-            <td data-cell="F2"></td>
-          </tr>
-          <tr>
-            <td>Шўртан ГКМ</td>
-            <td data-cell="B3"></td>
-            <td data-cell="C3"></td>
-            <td data-cell="D3"></td>
-            <td data-cell="E3"></td>
-            <td data-cell="F3"></td>
-          </tr>
-          <tr>
-            <td>Бухоро НКИЗ</td>
-            <td data-cell="B4"></td>
-            <td data-cell="C4"></td>
-            <td data-cell="D4"></td>
-            <td data-cell="E4"></td>
-            <td data-cell="F4"></td>
-          </tr>
-          <tr>
-            <td>Лукойл</td>
-            <td data-cell="B5"></td>
-            <td data-cell="C5"></td>
-            <td data-cell="D5"></td>
-            <td data-cell="E5"></td>
-            <td data-cell="F5"></td>
-          </tr>
-          <tr>
-            <td>NSROG</td>
-            <td data-cell="B6"></td>
-            <td data-cell="C6"></td>
-            <td data-cell="D6"></td>
-            <td data-cell="E6"></td>
-            <td data-cell="F6"></td>
-          </tr>
-          <tr>
-            <td>SANEG</td>
-            <td data-cell="B7"></td>
-            <td data-cell="C7"></td>
-            <td data-cell="D7"></td>
-            <td data-cell="E7"></td>
-            <td data-cell="F7"></td>
-          </tr>
+        <tbody id="company-table-body"></tbody>
+      </table>      
 
-          <!-- добавляй столько строк, сколько нужно -->
-        </tbody>
-      </table>
+
+
+
+
+
       <div class="circle-chart">
         <h3>Олтингугурт ишлаб чикариш улуши</h3>
         <div class="donut">
           <div class="hole"></div>
-          <p class="left" contenteditable="false" id="uzbekneftgaz-summary">800</p>
-          <p class="center">1200</p>
+          <p class="left" contenteditable="false" id="uzbekneftgazsum">0</p>
+          <p class="center">0</p>
           <p class="ton">ТОННА</p>
-          <p class="right" contenteditable="false" id="other-summary">500</p>
+          <p class="right" contenteditable="false" id="other-sum">0</p>
         </div>
 
         <!-- <div class="ung">UNG</div> -->
@@ -296,7 +243,7 @@
     
     <script src="script.js"></script>
     <script src="editScript.js"></script>
-    <script src="chartScript.js"></script>ы
+    <script src="chartScript.js"></script>
 </body>
 
 </html>
