@@ -307,6 +307,57 @@ document.getElementById('file-input').addEventListener('change', (event) => {
 
 
 
+        
+        document.getElementById("factory_date").addEventListener("click", () => {
+            const selectedDate = getSelectedDate();
+            if (!selectedDate) {
+                alert("Пожалуйста, выберите дату через календарь.");
+                return;
+            }
+
+            // Преобразуем выбранную дату в Excel-формат (число дней с 1899-12-30)
+            const targetExcelDate = Math.floor((selectedDate.getTime() / 86400000) + 25569);
+
+            let companiesSet = new Set();
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (row[0] === targetExcelDate && row[1]) {
+                    companiesSet.add(row[1]);
+                }
+            }
+
+            const companies = Array.from(companiesSet);
+            let tableRows = "";
+
+            companies.forEach(company => {
+                for (let i = 1; i < json.length; i++) {
+                    const row = json[i];
+                    if (row[0] === targetExcelDate && row[1] === company) {
+                        const colF = row[5] || "";
+                        const colG = row[6] || "";
+                        const colH = row[7] || "";
+                        const colQ = row[16] || "";
+                        const colR = row[17] || "";
+
+                        tableRows += `
+                            <tr>
+                                <td>${company}</td>
+                                <td>${colF}</td>
+                                <td>${colG}</td>
+                                <td>${colH}</td>
+                                <td>${colQ}</td>
+                                <td>${colR}</td>
+                            </tr>
+                        `;
+                        break;
+                    }
+                }
+            });
+
+            document.getElementById("company-table-body").innerHTML = tableRows;
+        });
+
+
     };
 
     reader.readAsArrayBuffer(input.files[0]);
