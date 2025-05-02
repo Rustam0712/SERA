@@ -361,7 +361,7 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
         else {
             lastFilledDate = dateCell;
         }
-        
+
 
         let sum2025 = 0;
         let sum2024 = 0;
@@ -440,10 +440,13 @@ function drawChart({ map2024, map2025 }) {
             startup: true
         },
         backgroundColor: 'transparent',
-        titleTextStyle: { color: '#ffffff', fontSize: 16 }
+        titleTextStyle: { color: '#ffffff', fontSize: 16 },
+        isStacked: false,
+        areaOpacity: 0.2 // это делает "тень" под линиями
     };
+    
 
-    const chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    const chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
     chart.draw(data, options);
 }
 
@@ -601,3 +604,55 @@ document.getElementById('last-year-btn').addEventListener('click', () => {
 
 //---------------------------------------------< SORT BY CHECKBOX >------------------------------------------------
 
+function updateDonutValues(filterType) {
+    const lastDate = getLastDate(); // Последняя дата в json
+
+    let uzbSum = 0;
+    let otherSum = 0;
+
+    json.forEach(row => {
+        const rowDate = parseDate(row[0]);
+        const value = parseFloat(row[7]) || 0;
+        const company = row[2];
+
+        let match = false;
+
+        if (filterType === 'day') {
+            match = rowDate.toDateString() === lastDate.toDateString();
+        } else if (filterType === 'month') {
+            match = rowDate.getMonth() === lastDate.getMonth() &&
+                rowDate.getFullYear() === lastDate.getFullYear();
+        } else if (filterType === 'year') {
+            match = rowDate.getFullYear() === lastDate.getFullYear();
+        }
+
+        if (match) {
+            if (company === 'Ўзбекнефтгаз') {
+                uzbSum += value;
+            } else {
+                otherSum += value;
+            }
+        }
+    });
+
+    document.getElementById('uzbekneftgazsum').textContent = Math.floor(uzbSum);
+    document.getElementById('other-sum').textContent = Math.floor(otherSum);
+
+    // updateDonut вызовется сам через MutationObserver
+}
+
+// Привязка кнопок только к пончику
+document.getElementById('last-day-btn').addEventListener('click', () => {
+    updateDonutValues('day');
+});
+
+document.getElementById('last-month-btn').addEventListener('click', () => {
+    updateDonutValues('month');
+});
+
+document.getElementById('last-year-btn').addEventListener('click', () => {
+    updateDonutValues('year');
+});
+
+// Инициализация при загрузке страницы
+updateDonutValues('day');
