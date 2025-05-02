@@ -545,10 +545,14 @@ select {
 }
 
 #chart_div {
-  background: #1e2e3e;
+  position: absolute;
+  /* background: #1e2e3e; */
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.4); */
+  width: 130%;
+  height: 120%;
+  /* border: 1px solid black; */
 }
 
 
