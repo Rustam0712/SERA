@@ -75,8 +75,8 @@ function updateSummaries() {
 let json = [];
 let lastFilledDate = null;
 
-document.getElementById('upload-btn').addEventListener('click', () => {
-    const input = document.getElementById('file-input');
+document.getElementById('file-input').addEventListener('change', (event) => {
+    const input = event.target;
     if (!input.files.length) {
         alert('Пожалуйста, выберите файл Excel.');
         return;
@@ -93,12 +93,12 @@ document.getElementById('upload-btn').addEventListener('click', () => {
             return;
         }
 
+        // 👇 Весь твой код оставляем без изменений внутри
         json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         lastFilledDate = null;
 
         drawChart(filterData("Общий", null, null));
-        updateSummaries(); // <<< ВОТ ЭТО ОБЯЗАТЕЛЬНО ДОБАВЬ
-
+        updateSummaries();
 
         //-------------------------------------->
         // 👉 Считаем сумму после загрузки файла
@@ -309,9 +309,9 @@ document.getElementById('upload-btn').addEventListener('click', () => {
 
     };
 
-
     reader.readAsArrayBuffer(input.files[0]);
 });
+
 
 // ✅ Фильтрация при выборе категории и компании
 document.querySelectorAll('.category-btn').forEach(button => {
@@ -444,7 +444,7 @@ function drawChart({ map2024, map2025 }) {
         isStacked: false,
         areaOpacity: 0.2 // это делает "тень" под линиями
     };
-    
+
 
     const chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
     chart.draw(data, options);
