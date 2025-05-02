@@ -615,3 +615,41 @@ select {
 #company-table-body td {
   font-size: 16px;
 }
+
+
+
+#factory_date {
+  background-color: #04AA6D; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 5spx;
+}
+
+#sum-text {
+  font-size: 14px;
+}
+
+#s-column-sum {
+  font-size: 14px;
+}
+
+#sum-text1 {
+  font-size: 14px;
+}
+
+#sum-text2 {
+  font-size: 14px;
+}
+
+#s-column-sum1 {
+  font-size: 14px;
+}
+
+#s-column-sum2 {
+  font-size: 14px;
+}
