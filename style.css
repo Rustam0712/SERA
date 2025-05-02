@@ -425,7 +425,8 @@ button.newinfo:hover {
     position: absolute;
     margin-top: 120px;
     width: 1258px;
-    height: 250px;
+    height: 350px;
+    z-index: 10;
 }
 
 .factory-table th,
