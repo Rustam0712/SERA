@@ -124,7 +124,7 @@
   }
 
   .card {
-    background: #1b2e42;
+    background-color: #1b2e42;
     border: 2px solid #2c3e50;
     padding: 0px;
     /* position: relative; */
@@ -371,7 +371,7 @@ button.newinfo:hover {
   
   .production-table th {
     background-color: #333;
-    font-size: 14px;
+    font-size: 16px;
   }
   
   .production-table tr {
@@ -598,4 +598,8 @@ select {
 .dobichabtn:hover {
   background: none;
   color: skyblue;
+}
+
+.production-table td {
+  font-size: 24px;
 }
