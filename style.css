@@ -195,7 +195,11 @@
     flex-direction: column;
     background: #1b2e42;
     border: 2px solid #2c3e50;
+
+    height: 112.5%;
+    margin-top: -27%;
   }
+
 
   .donut {
     position: relative;
@@ -480,7 +484,7 @@ button:hover {
 
 .circle-chart h3 {
   position: absolute;
-  top: 170px;
+  top: 5%;
   z-index: 1;
   border-bottom: 2px solid white;
   width: 400px;

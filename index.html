@@ -21,9 +21,12 @@
     <div class="top-bar">
       <img src="Снимок экрана 2025-04-18 174333.png" alt="logo" class="logo">
       <p class="tit">ОЛТИНГУГУРТ ИШЛАБ ЧИКАРИШ ВА ИСТЕЬМОЛЧИЛАРГА ЕТКАЗИБ БЕРИШ КУРСАТКИЧЛАР</p>
-      <img src="user.png" class="calendar" alt="userimg"></img>
+      <div class="calendar-container" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+        <input type="text" id="date-picker" placeholder="Выберите дату"
+          style="padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc;">
+      </div>
     </div>
-    
+
 
     <div class="left-panel">
       <div class="checkbox-group">
@@ -109,77 +112,73 @@
     <div class="main-panel">
       <div class="card dropdown">
         <div class="tablebox" id="last-day-btn" style="cursor: pointer;">
-            Кунлик
+          Кунлик
         </div>
         <table class="production-table">
-            <thead>
-                <tr>
-                    <th>Режа</th>
-                    <th>Амалда</th>
-                    <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td id="day-plan">0</td>
-                    <td id="day-actual">0</td>
-                    <td id="day-mid">0</td> <!-- Значение Mid для дня -->
-                </tr>
-            </tbody>
+          <thead>
+            <tr>
+              <th>Режа</th>
+              <th>Амалда</th>
+              <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="day-plan">0</td>
+              <td id="day-actual">0</td>
+              <td id="day-mid">0</td> <!-- Значение Mid для дня -->
+            </tr>
+          </tbody>
         </table>
-    </div>
-    
-    <div class="card dropdown">
-        <div class="tablebox" id="last-month-btn" style="cursor: pointer;">
-            Ой бошидан
-        </div>
-        <table class="production-table">
-            <thead>
-                <tr>
-                    <th>Режа</th>
-                    <th>Амалда</th>
-                    <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td id="month-plan">0</td>
-                    <td id="month-actual">0</td>
-                    <td id="month-mid">0</td> <!-- Значение Mid для месяца -->
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    
-    <div class="card dropdown" style="">
-        <div class="tablebox" id="last-year-btn" style="cursor: pointer;">
-            Йил бошидан
-        </div>
-        <table class="production-table">
-            <thead>
-                <tr>
-                    <th>Режа</th>
-                    <th>Амалда</th>
-                    <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td id="year-plan">0</td>
-                    <td id="year-actual">0</td>
-                    <td id="year-mid">0</td> <!-- Значение Mid для года -->
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    
-      
-
-      <div class="calendar-container" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-        <label for="datePicker" style="font-weight: bold;">Сана:</label>
-        <input type="text" id="date-picker" placeholder="Выберите дату"
-          style="padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc;">
       </div>
+
+      <div class="card dropdown">
+        <div class="tablebox" id="last-month-btn" style="cursor: pointer;">
+          Ой бошидан
+        </div>
+        <table class="production-table">
+          <thead>
+            <tr>
+              <th>Режа</th>
+              <th>Амалда</th>
+              <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="month-plan">0</td>
+              <td id="month-actual">0</td>
+              <td id="month-mid">0</td> <!-- Значение Mid для месяца -->
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card dropdown" style="">
+        <div class="tablebox" id="last-year-btn" style="cursor: pointer;">
+          Йил бошидан
+        </div>
+        <table class="production-table">
+          <thead>
+            <tr>
+              <th>Режа</th>
+              <th>Амалда</th>
+              <th>+/-</th> <!-- Столбец будет использоваться для Mid -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="year-plan">0</td>
+              <td id="year-actual">0</td>
+              <td id="year-mid">0</td> <!-- Значение Mid для года -->
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+
+      <br>
 
       <div class="probel"></div>
 
@@ -196,7 +195,7 @@
           </tr>
         </thead>
         <tbody id="company-table-body"></tbody>
-      </table>      
+      </table>
 
 
 
@@ -219,14 +218,14 @@
       </div>
       <div class="btn-con">
 
-        
+
 
         <!-- Календарь для выбора даты -->
-        
 
 
 
-        
+
+
       </div>
       <div class="line-chart"></div>
 
@@ -235,7 +234,7 @@
     <div class="chart-box">
       <div id="chart_div"></div>
     </div>
-    
+
     <script src="script.js"></script>
     <script src="editScript.js"></script>
     <script src="chartScript.js"></script>
