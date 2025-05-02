@@ -287,17 +287,18 @@ document.getElementById('file-input').addEventListener('change', (event) => {
                     const colH = row[7] || "";
                     const colQ = row[16] || "";
                     const colR = row[17] || "";
+                    const companyType = row[2] || ""; // колонка C
 
                     tableRows += `
-                <tr>
-                    <td>${company}</td>
-                    <td>${colF}</td>
-                    <td>${colG}</td>
-                    <td>${colH}</td>
-                    <td>${colQ}</td>
-                    <td>${colR}</td>
-                </tr>
-            `;
+                    <tr data-company-type="${companyType}">
+                        <td>${company}</td>
+                        <td>${colF}</td>
+                        <td>${colG}</td>
+                        <td>${colH}</td>
+                        <td>${colQ}</td>
+                        <td>${colR}</td>
+                    </tr>
+                    `;
                     break;
                 }
             }
@@ -307,7 +308,7 @@ document.getElementById('file-input').addEventListener('change', (event) => {
 
 
 
-        
+
         document.getElementById("factory_date").addEventListener("click", () => {
             const selectedDate = getSelectedDate();
             if (!selectedDate) {
@@ -339,15 +340,17 @@ document.getElementById('file-input').addEventListener('change', (event) => {
                         const colQ = row[16] || "";
                         const colR = row[17] || "";
 
+                        const companyType = row[2] || ""; // колонка C
+
                         tableRows += `
-                            <tr>
-                                <td>${company}</td>
-                                <td>${colF}</td>
-                                <td>${colG}</td>
-                                <td>${colH}</td>
-                                <td>${colQ}</td>
-                                <td>${colR}</td>
-                            </tr>
+                        <tr data-company-type="${companyType}">
+                            <td>${company}</td>
+                            <td>${colF}</td>
+                            <td>${colG}</td>
+                            <td>${colH}</td>
+                            <td>${colQ}</td>
+                            <td>${colR}</td>
+                        </tr>
                         `;
                         break;
                     }
@@ -358,6 +361,55 @@ document.getElementById('file-input').addEventListener('change', (event) => {
         });
 
 
+
+
+
+        // Храним текущий фильтр
+        let currentFilter = "summary";
+
+        document.getElementById("summary").addEventListener("click", () => {
+            currentFilter = "summary";
+            updateTableByFilter();
+        });
+
+        document.getElementById("neft").addEventListener("click", () => {
+            currentFilter = "neft";
+            updateTableByFilter();
+        });
+
+        document.getElementById("xk").addEventListener("click", () => {
+            currentFilter = "xk";
+            updateTableByFilter();
+        });
+
+        function updateTableByFilter() {
+            const rows = document.querySelectorAll("#company-table-body tr");
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                const companyType = row.getAttribute("data-company-type");
+
+                if (currentFilter === "summary" ||
+                    (currentFilter === "neft" && companyType === "Ўзбекнефтгаз") ||
+                    (currentFilter === "xk" && companyType === "Хорижий ва ҚК")) {
+                    // Активная строка
+                    row.classList.remove("faded");
+                    for (let i = 1; i < cells.length; i++) {
+                        if (cells[i].getAttribute("data-original")) {
+                            cells[i].textContent = cells[i].getAttribute("data-original");
+                        }
+                    }
+                } else {
+                    // Потухшая строка
+                    row.classList.add("faded");
+                    for (let i = 1; i < cells.length; i++) {
+                        if (!cells[i].getAttribute("data-original")) {
+                            cells[i].setAttribute("data-original", cells[i].textContent);
+                        }
+                        cells[i].textContent = "-";
+                    }
+                }
+            });
+        }
     };
 
     reader.readAsArrayBuffer(input.files[0]);

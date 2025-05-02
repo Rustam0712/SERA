@@ -503,6 +503,11 @@ button:hover {
   margin-top: 750px;
 }
 
+.faded {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 h1 {
   text-align: center;
   margin-bottom: 30px;
