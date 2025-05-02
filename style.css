@@ -603,3 +603,6 @@ select {
 .production-table td {
   font-size: 24px;
 }
+#company-table-body td {
+  font-size: 16px;
+}
