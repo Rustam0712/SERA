@@ -358,6 +358,10 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
         } else if (startDate && endDate) {
             if (dateCell < startDate || dateCell > endDate) continue;
         }
+        else {
+            lastFilledDate = dateCell;
+        }
+        
 
         let sum2025 = 0;
         let sum2024 = 0;
@@ -508,4 +512,92 @@ for (let value of map2025.values()) {
 
 //Сумма "Кун бошида колдик"
 document.getElementById('sum-text').innerText = `${totalSum.toFixed(2)}`;
+
+
+
+
+
+function updateFactoryTableByPeriod(period) {
+    if (!lastFilledDate || json.length === 0) return;
+
+    const targetRows = [];
+    const lastYear = lastFilledDate.getFullYear();
+    const lastMonth = lastFilledDate.getMonth();
+    const lastDay = lastFilledDate.getDate();
+
+    for (let i = 1; i < json.length; i++) {
+        const row = json[i];
+        if (!row || !row[0]) continue;
+
+        const excelDate = row[0];
+        const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+        if (isNaN(dateCell)) continue;
+
+        const sameDay = dateCell.getFullYear() === lastYear && dateCell.getMonth() === lastMonth && dateCell.getDate() === lastDay;
+        const sameMonth = dateCell.getFullYear() === lastYear && dateCell.getMonth() === lastMonth;
+        const sameYear = dateCell.getFullYear() === lastYear;
+
+        if (
+            (period === 'day' && sameDay) ||
+            (period === 'month' && sameMonth) ||
+            (period === 'year' && sameYear)
+        ) {
+            targetRows.push(row);
+        }
+    }
+
+    // Сбор компаний
+    const companiesSet = new Set();
+    targetRows.forEach(row => {
+        if (row[1]) companiesSet.add(row[1]); // колонка B
+    });
+
+    const companies = Array.from(companiesSet);
+    let tableRows = "";
+
+    companies.forEach(company => {
+        // собираем все строки этой компании
+        const companyRows = targetRows.filter(row => row[1] === company);
+
+        // суммируем нужные значения
+        let sumF = 0, sumG = 0, sumH = 0, sumQ = 0, sumR = 0;
+
+        companyRows.forEach(row => {
+            sumF += parseFloat(row[5]) || 0;
+            sumG += parseFloat(row[6]) || 0;
+            sumH += parseFloat(row[7]) || 0;
+            sumQ += parseFloat(row[16]) || 0;
+            sumR += parseFloat(row[17]) || 0;
+        });
+
+        tableRows += `
+            <tr>
+                <td>${company}</td>
+                <td>${sumF.toFixed(2)}</td>
+                <td>${sumG.toFixed(2)}</td>
+                <td>${sumH.toFixed(2)}</td>
+                <td>${sumQ.toFixed(2)}</td>
+                <td>${sumR.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("company-table-body").innerHTML = tableRows;
+}
+document.getElementById('last-day-btn').addEventListener('click', () => {
+    updateFactoryTableByPeriod('day');
+});
+
+document.getElementById('last-month-btn').addEventListener('click', () => {
+    updateFactoryTableByPeriod('month');
+});
+
+document.getElementById('last-year-btn').addEventListener('click', () => {
+    updateFactoryTableByPeriod('year');
+});
+
+
+
+
+//---------------------------------------------< SORT BY CHECKBOX >------------------------------------------------
 
