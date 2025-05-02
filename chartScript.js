@@ -358,6 +358,52 @@ document.getElementById('file-input').addEventListener('change', (event) => {
             });
 
             document.getElementById("company-table-body").innerHTML = tableRows;
+
+
+            // Этот код добавляй ВНУТРИ обработчика кнопки #factory_date — после отрисовки таблицы
+            let ishlabChiqarishSum = 0;
+            let birjagaYuklashSum = 0;
+            let eksportSum = 0;
+            let sColumnSum = 0;
+
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (!row || !row[0]) continue;
+
+                const excelDate = row[0];
+                const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+                if (isNaN(dateCell)) continue;
+
+                if (
+                    dateCell.getDate() === selectedDate.getDate() &&
+                    dateCell.getMonth() === selectedDate.getMonth() &&
+                    dateCell.getFullYear() === selectedDate.getFullYear()
+                ) {
+                    const category = row[3];
+                    const value = parseFloat(row[7]); // H колонка
+
+                    if (category === "Ишлаб чиқариш" && !isNaN(value)) {
+                        ishlabChiqarishSum += value;
+                    }
+                    if (category === "Биржага юклаш" && !isNaN(value)) {
+                        birjagaYuklashSum += value;
+                    }
+                    if (category === "Экспорт" && !isNaN(value)) {
+                        eksportSum += value;
+                    }
+
+                    const sVal = parseFloat(row[18]); // S колонка
+                    if (!isNaN(sVal)) {
+                        sColumnSum += sVal;
+                    }
+                }
+            }
+
+            document.getElementById('sum-text').innerText = ishlabChiqarishSum.toFixed(2);
+            document.getElementById('sum-text1').innerText = birjagaYuklashSum.toFixed(2);
+            document.getElementById('sum-text2').innerText = eksportSum.toFixed(2);
+            document.getElementById('s-column-sum').innerText = sColumnSum.toFixed(2);
+
         });
 
 
