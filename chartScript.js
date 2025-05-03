@@ -477,7 +477,9 @@ document.querySelectorAll('.category-btn').forEach(button => {
 // 📅 Выбор даты через календарь
 function getSelectedDate() {
     const dateStr = document.getElementById('date-picker')?.value;
-    if (!dateStr) return null;
+
+    // 🔹 Проверка: если ничего не выбрано или специально указано "не выбрано"
+    if (!dateStr || dateStr.toLowerCase() === "не выбрано") return null;
 
     const [day, month, year] = dateStr.split('.');
     return new Date(`${year}-${month}-${day}`);
@@ -506,11 +508,10 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
             ) continue;
         } else if (startDate && endDate) {
             if (dateCell < startDate || dateCell > endDate) continue;
-        }
-        else {
+        } else {
+            // Если нет фильтра по дате, обновляем последнюю заполненную дату
             lastFilledDate = dateCell;
         }
-
 
         let sum2025 = 0;
         let sum2024 = 0;
@@ -544,6 +545,7 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
 
     return { map2024, map2025 };
 }
+
 
 // 📈 Отрисовка графика
 function drawChart({ map2024, map2025 }) {
@@ -603,8 +605,30 @@ function drawChart({ map2024, map2025 }) {
 flatpickr("#date-picker", {
     dateFormat: "d.m.Y",
     allowInput: true,
-    maxDate: "today"
+    defaultDate: null,
+    onReady: function (selectedDates, dateStr, instance) {
+        instance.input.placeholder = "не выбрано";
+    },
 });
+
+document.getElementById("cclear").addEventListener("click", () => {
+    const dateInput = document.getElementById("date-picker");
+    if (dateInput._flatpickr) {
+        dateInput._flatpickr.clear(); // Очищает выбранную дату
+    }
+    dateInput.value = ""; // На всякий случай принудительно очищаем
+    lastFilledDate = null;
+
+    // 🔄 Повторный вызов основного рендера без фильтрации по дате
+    const selectedCategory = getCurrentCategory();     // твоя функция выбора типа (Ишлаб чикариш и т.д.)
+    const selectedCompany = getCurrentCompany();       // твоя функция выбора компании (summary, neft, xk)
+
+    renderTable(selectedCompany, selectedCategory, null); // без selectedDate
+    renderChart(selectedCompany, selectedCategory, null); // если используешь для графика
+
+    console.log("Дата сброшена, график и таблица обновлены.");
+});
+
 
 // 📅 Обработчики кнопок для последнего дня, месяца, года
 
