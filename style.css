@@ -329,21 +329,26 @@ button.checkbox:hover {
   padding-bottom: 10px;
 }
 
-a.newinfo {
-    background: #1b2e42;
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border: 2px solid #2c3e50;
-    height: 60px;
-
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-    color: white;
-    font-family: 'Times New Roman', sans-serif;
-    justify-content: center;
+/* Стили для кнопки загрузки файла */
+.newinfo {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #2980b9;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
 }
+.newinfo:hover {
+  background-color:#155ab6;
+}
+
+/* Скрытие стандартного поля input */
+#file-input {
+  display: none;
+}
+
 
 a.newinfo:hover {
     background-color: #3498db;

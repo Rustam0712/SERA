@@ -289,22 +289,106 @@ document.getElementById('file-input').addEventListener('change', (event) => {
                     const colR = row[17] || "";
                     const companyType = row[2] || ""; // колонка C
 
+                    const formattedColF = typeof colF === "number" ? colF.toFixed(2) : colF;
+                    const formattedColG = typeof colG === "number" ? colG.toFixed(2) : colG;
+                    const formattedColH = typeof colH === "number" ? colH.toFixed(2) : colH;
+                    const formattedColQ = typeof colQ === "number" ? colQ.toFixed(2) : colQ;
+                    const formattedColR = typeof colR === "number" ? colR.toFixed(2) : colR;
+
                     tableRows += `
                     <tr data-company-type="${companyType}">
                         <td>${company}</td>
-                        <td>${colF}</td>
-                        <td>${colG}</td>
-                        <td>${colH}</td>
-                        <td>${colQ}</td>
-                        <td>${colR}</td>
+                        <td>${formattedColF}</td>
+                        <td>${formattedColG}</td>
+                        <td>${formattedColH}</td>
+                        <td>${formattedColQ}</td>
+                        <td>${formattedColR}</td>
                     </tr>
-                    `;
+                `;
                     break;
                 }
             }
         });
 
         document.getElementById("company-table-body").innerHTML = tableRows;
+
+
+        // ✅ Список компаний из изображения
+        const companyList = [
+            "SANEG МЧЖ",
+            "Муборак ГҚИЗ",
+            "Шўртан НГҚЧБ",
+            "Шўртан ГКМ МЧЖ",
+            "Бухоро НҚИЗ МЧЖ",
+            "LUKOIL МЧЖ",
+            "New silk road oil & gas МЧЖ"
+        ];
+
+        // ✅ Функция обновления factory-table по категории
+        // ✅ Функция обновления factory-table по категории
+        function updateFactoryTableByCategory(categoryName) {
+            let companiesSet = new Set(companyList);
+            let tableRows = "";
+
+            const latestDate = (() => {
+                let lastDate = null;
+                for (let i = 1; i < json.length; i++) {
+                    const row = json[i];
+                    if (row[0]) lastDate = row[0];
+                }
+                return lastDate;
+            })();
+
+            companiesSet.forEach(company => {
+                for (let i = 1; i < json.length; i++) {
+                    const row = json[i];
+                    if (
+                        row[0] === latestDate &&
+                        row[1] === company &&
+                        row[3] === categoryName
+                    ) {
+                        const colF = row[5] || "";
+                        const colG = row[6] || "";
+                        const colH = row[7] || "";
+                        const colQ = row[16] || "";
+                        const colR = row[17] || "";
+                        const companyType = row[2] || "";
+
+                        // Применяем .toFixed(2) для числовых значений
+                        const formattedColF = typeof colF === "number" ? colF.toFixed(2) : colF;
+                        const formattedColG = typeof colG === "number" ? colG.toFixed(2) : colG;
+                        const formattedColH = typeof colH === "number" ? colH.toFixed(2) : colH;
+                        const formattedColQ = typeof colQ === "number" ? colQ.toFixed(2) : colQ;
+                        const formattedColR = typeof colR === "number" ? colR.toFixed(2) : colR;
+
+                        tableRows += `
+                    <tr data-company-type="${companyType}">
+                        <td>${company}</td>
+                        <td>${formattedColF}</td>
+                        <td>${formattedColG}</td>
+                        <td>${formattedColH}</td>
+                        <td>${formattedColQ}</td>
+                        <td>${formattedColR}</td>
+                    </tr>
+                `;
+                        break;
+                    }
+                }
+            });
+
+            document.getElementById("company-table-body").innerHTML = tableRows;
+        }
+
+
+        // ✅ Подключение обработчиков к кнопкам
+        const categoryButtons = document.querySelectorAll(".category-btn.dobichabtn");
+        categoryButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                const category = button.getAttribute("data-category");
+                updateFactoryTableByCategory(category);
+            });
+        });
+
 
 
 
@@ -358,6 +442,11 @@ document.getElementById('file-input').addEventListener('change', (event) => {
             });
 
             document.getElementById("company-table-body").innerHTML = tableRows;
+
+
+
+
+
 
 
             // Этот код добавляй ВНУТРИ обработчика кнопки #factory_date — после отрисовки таблицы
@@ -746,20 +835,28 @@ function updateFactoryTableByPeriod(period) {
             sumR += parseFloat(row[17]) || 0;
         });
 
+        // Применяем форматирование с пробелами для тысяч
+        const formattedSumF = sumF.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        const formattedSumG = sumG.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        const formattedSumH = sumH.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        const formattedSumQ = sumQ.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        const formattedSumR = sumR.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
         tableRows += `
             <tr>
                 <td>${company}</td>
-                <td>${sumF.toFixed(2)}</td>
-                <td>${sumG.toFixed(2)}</td>
-                <td>${sumH.toFixed(2)}</td>
-                <td>${sumQ.toFixed(2)}</td>
-                <td>${sumR.toFixed(2)}</td>
+                <td>${formattedSumF}</td>
+                <td>${formattedSumG}</td>
+                <td>${formattedSumH}</td>
+                <td>${formattedSumQ}</td>
+                <td>${formattedSumR}</td>
             </tr>
         `;
     });
 
     document.getElementById("company-table-body").innerHTML = tableRows;
 }
+
 document.getElementById('last-day-btn').addEventListener('click', () => {
     updateFactoryTableByPeriod('day');
 });
@@ -829,3 +926,8 @@ document.getElementById('last-year-btn').addEventListener('click', () => {
 
 // Инициализация при загрузке страницы
 updateDonutValues('day');
+
+document.getElementById('file-input').addEventListener('change', function() {
+    // Название файла не будет отображаться
+    console.log('Файл загружен, но не показывается в интерфейсе.');
+});

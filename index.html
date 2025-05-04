@@ -22,18 +22,17 @@
       <img src="Снимок экрана 2025-04-18 174333.png" alt="logo" class="logo">
       <p class="tit">ОЛТИНГУГУРТ ИШЛАБ ЧИКАРИШ ВА ИСТЕЬМОЛЧИЛАРГА ЕТКАЗИБ БЕРИШ КУРСАТКИЧЛАР</p>
       <div class="calendar-container" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-        <input type="text" id="date-picker" placeholder="Выберите дату"
-          style="
+        <input type="text" id="date-picker" placeholder="Выберите дату" style="
             padding: 6px 10px;
             border-radius: 6px;
             border: 1px solid #ccc;
             background-color: #0c1f3c; /* тёмно-синий фон */
             color: #cccccc; /* светло-серый текст */
           ">
-          <button id="factory_date">Filter</button>
-          <button id="cclear">✖</button>
+        <button id="factory_date">Filter</button>
+        <button id="cclear">✖</button>
       </div>
-      
+
     </div>
 
 
@@ -83,7 +82,7 @@
         <div class="icon-block">
           <img src="Рисунок3.png" alt="" class="icon">
           <div class="left-box">
-            <button class="category-btn dobichabtn" data-category="Биржага юклаш">Юклаш</button>
+            <button class="category-btn dobichabtn" data-category="Биржага юклаш">Биржага юклаш</button>
             <p id="sum-text1">0</p>
           </div>
         </div>
@@ -112,10 +111,11 @@
 
 
 
-      <a class="newinfo" id="updateButton" href="edit.html">
+      <label for="file-input" class="newinfo">
         Малумот юклаш
-      </a>
-      <input type="file" id="file-input" class="newinfo" accept=".xlsx, .xls">
+      </label>
+      <input type="file" id="file-input" class="newinfo" accept=".xlsx, .xls" style="display: none;" />
+
     </div>
 
     <div class="main-panel">
