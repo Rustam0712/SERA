@@ -1,22 +1,42 @@
 google.charts.load('current', { packages: ['corechart'] });
 
-function updateSummaries() {
+
+let selectedCategory = 'Ишлаб чиқариш'; // Значение по умолчанию
+document.querySelectorAll('.dobichabtn').forEach(button => {
+    button.addEventListener('click', () => {
+        selectedCategory = button.getAttribute('data-category');
+        updateSummaries();
+    });
+});
+
+document.getElementById('last-day-btn').addEventListener('click', () => {
+    selectedPeriod = 'day';
+    updateSummaries();
+    updateDonutChart('day');
+});
+
+document.getElementById('last-month-btn').addEventListener('click', () => {
+    selectedPeriod = 'month';
+    updateSummaries();
+    updateDonutChart('month');
+});
+
+document.getElementById('last-year-btn').addEventListener('click', () => {
+    selectedPeriod = 'year';
+    updateSummaries();
+    updateDonutChart('year');
+});
+
+
+function updateDonutChart(period) {
+    let uzbekneftgazSum = 0;
+    let otherSum = 0;
+
     if (!lastFilledDate) {
-        document.getElementById('day-plan').innerText = '0';
-        document.getElementById('day-actual').innerText = '0';
-        document.getElementById('day-mid').innerText = '0'; // Mid для дня
-        document.getElementById('month-plan').innerText = '0';
-        document.getElementById('month-actual').innerText = '0';
-        document.getElementById('month-mid').innerText = '0'; // Mid для месяца
-        document.getElementById('year-plan').innerText = '0';
-        document.getElementById('year-actual').innerText = '0';
-        document.getElementById('year-mid').innerText = '0'; // Mid для года
+        document.getElementById('uzbekneftgazsum').innerText = '0';
+        document.getElementById('other-sum').innerText = '0';
         return;
     }
-
-    let dayPlan = 0, dayActual = 0, dayMid = 0; // Добавляем переменную для mid
-    let monthPlan = 0, monthActual = 0, monthMid = 0; // Добавляем переменную для mid
-    let yearPlan = 0, yearActual = 0, yearMid = 0; // Добавляем переменную для mid
 
     const lastDay = lastFilledDate.getDate();
     const lastMonth = lastFilledDate.getMonth();
@@ -24,51 +44,128 @@ function updateSummaries() {
 
     for (let i = 1; i < json.length; i++) {
         const row = json[i];
-        if (!row || !row[0]) continue;
+        if (!row || row.length < 8 || !row[0] || !row[2] || !row[3]) continue;
 
         const excelDate = row[0];
-        const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+        const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
         if (isNaN(dateCell)) continue;
 
-        const plan = parseFloat(row[6]) || 0;   // G колонка
-        const actual = parseFloat(row[7]) || 0; // H колонка
-        const mid = parseFloat(row[8]) || 0;   // I колонка (mid)
+        const company = row[2].trim();
+        const category = row[3].trim();
+        const value = parseFloat(row[7]) || 0;
 
-        if (dateCell.getFullYear() === lastYear) {
-            yearPlan += plan;
-            yearActual += actual;
-            yearMid += mid; // Добавляем для года
+        if (category !== "Ишлаб чиқариш") continue;
 
-            if (dateCell.getMonth() === lastMonth) {
-                monthPlan += plan;
-                monthActual += actual;
-                monthMid += mid; // Добавляем для месяца
+        const rowDay = dateCell.getDate();
+        const rowMonth = dateCell.getMonth();
+        const rowYear = dateCell.getFullYear();
 
-                if (dateCell.getDate() === lastDay) {
-                    dayPlan += plan;
-                    dayActual += actual;
-                    dayMid += mid; // Добавляем для дня
-                }
+        let match = false;
+        if (period === 'day' && rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
+            match = true;
+        } else if (period === 'month' && rowYear === lastYear && rowMonth === lastMonth) {
+            match = true;
+        } else if (period === 'year' && rowYear === lastYear) {
+            match = true;
+        }
+
+        if (match && !isNaN(value)) {
+            if (company === "Ўзбекнефтгаз") {
+                uzbekneftgazSum += value;
+            } else {
+                otherSum += value;
             }
         }
     }
 
-    console.log(`Сумма за день: План=${dayPlan}, Факт=${dayActual}, Mid=${dayMid}`);
-    console.log(`Сумма за месяц: План=${monthPlan}, Факт=${monthActual}, Mid=${monthMid}`);
-    console.log(`Сумма за год: План=${yearPlan}, Факт=${yearActual}, Mid=${yearMid}`);
+    // форматируем в зависимости от периода
+    const format = period === 'day' ? (v) => v.toFixed(1) : (v) => v.toFixed(0);
+
+    document.getElementById('uzbekneftgazsum').innerText = format(uzbekneftgazSum);
+    document.getElementById('other-sum').innerText = format(otherSum);
+    // Вывод суммы в центр круга
+    const totalSum = uzbekneftgazSum + otherSum;
+    document.querySelector('.donut .center').innerText = format(totalSum);
+
+}
+
+
+
+
+
+function updateSummaries() {
+    if (!lastFilledDate) {
+        document.getElementById('day-plan').innerText = '0';
+        document.getElementById('day-actual').innerText = '0';
+        document.getElementById('day-mid').innerText = '0';
+        document.getElementById('month-plan').innerText = '0';
+        document.getElementById('month-actual').innerText = '0';
+        document.getElementById('month-mid').innerText = '0';
+        document.getElementById('year-plan').innerText = '0';
+        document.getElementById('year-actual').innerText = '0';
+        document.getElementById('year-mid').innerText = '0';
+        return;
+    }
+
+    let dayPlan = 0, dayActual = 0, dayMid = 0;
+    let monthPlan = 0, monthActual = 0, monthMid = 0;
+    let yearPlan = 0, yearActual = 0, yearMid = 0;
+
+    const lastDay = lastFilledDate.getDate();
+    const lastMonth = lastFilledDate.getMonth();
+    const lastYear = lastFilledDate.getFullYear();
+
+    for (let i = 1; i < json.length; i++) {
+        const row = json[i];
+        if (!row || row.length < 9 || !row[0]) continue;
+
+        // ❗ Проверяем колонку D на соответствие выбранной категории
+        if ((row[3] || '').trim() !== selectedCategory) continue;
+
+        const excelDate = row[0];
+        const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
+        if (isNaN(dateCell)) continue;
+
+        const plan = parseFloat(row[6]) || 0;
+        const actual = parseFloat(row[7]) || 0;
+        const mid = parseFloat(row[8]) || 0;
+
+        const rowYear = dateCell.getFullYear();
+        const rowMonth = dateCell.getMonth();
+        const rowDay = dateCell.getDate();
+
+        if (rowYear === lastYear) {
+            yearPlan += plan;
+            yearActual += actual;
+            yearMid += mid;
+        }
+
+        if (rowYear === lastYear && rowMonth === lastMonth) {
+            monthPlan += plan;
+            monthActual += actual;
+            monthMid += mid;
+        }
+
+        if (rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
+            dayPlan += plan;
+            dayActual += actual;
+            dayMid += mid;
+        }
+    }
 
     document.getElementById('day-plan').innerText = dayPlan.toFixed(2);
     document.getElementById('day-actual').innerText = dayActual.toFixed(2);
-    document.getElementById('day-mid').innerText = dayMid.toFixed(2); // Обновляем mid для дня
+    document.getElementById('day-mid').innerText = dayMid.toFixed(2);
 
     document.getElementById('month-plan').innerText = monthPlan.toFixed(2);
     document.getElementById('month-actual').innerText = monthActual.toFixed(2);
-    document.getElementById('month-mid').innerText = monthMid.toFixed(2); // Обновляем mid для месяца
+    document.getElementById('month-mid').innerText = monthMid.toFixed(2);
 
     document.getElementById('year-plan').innerText = yearPlan.toFixed(2);
     document.getElementById('year-actual').innerText = yearActual.toFixed(2);
-    document.getElementById('year-mid').innerText = yearMid.toFixed(2); // Обновляем mid для года
+    document.getElementById('year-mid').innerText = yearMid.toFixed(2);
 }
+
 
 
 
@@ -254,6 +351,7 @@ document.getElementById('file-input').addEventListener('change', (event) => {
         document.getElementById('other-sum').innerText = `${otherSum.toFixed(0)}`;
         console.log("Ўзбекнефтгаз сумма:", uzbekneftgazSum);
         console.log("Бошқа компаниялар сумма:", otherSum);
+
 
 
 
@@ -927,7 +1025,9 @@ document.getElementById('last-year-btn').addEventListener('click', () => {
 // Инициализация при загрузке страницы
 updateDonutValues('day');
 
-document.getElementById('file-input').addEventListener('change', function() {
+document.getElementById('file-input').addEventListener('change', function () {
     // Название файла не будет отображаться
     console.log('Файл загружен, но не показывается в интерфейсе.');
 });
+
+
