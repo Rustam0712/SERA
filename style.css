@@ -59,24 +59,51 @@
     border: 2px solid #2c3e50;
     display: flex;
     flex-direction: column;
+    gap: 10px; /* Отступ между строками */
   }
-
+  
   .checkcon {
-      display: flex;
-      align-items: center;
-      flex-direction: row;
-      justify-content: space-between;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Расстояние между чекбоксом и текстом */
   }
-
+  
   .checkbox {
     width: 20px;
     height: 20px;
     border: 2px solid #ccc;
-
+    background-color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
   }
+  
+  .checkcon p {
+    margin: 0;
+    color: #fff; /* Цвет текста (если тёмный фон) */
+    font-size: 14px;
+  }
+  .checkbox.active {
+    background-color: #2ecc71; /* Зелёный фон при выборе */
+    color: white;
+    font-weight: bold;
+  }
+  
+  .checkbox::after {
+    content: '';
+  }
+  
+  .checkbox.active::after {
+    content: '✓';
+    font-size: 14px;
+  }
+  
+  .checkbox.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+    
 
   .checkbox.checked {
     background-color: #ffc107;

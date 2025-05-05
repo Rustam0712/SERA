@@ -327,6 +327,86 @@ document.getElementById('file-input').addEventListener('change', (event) => {
         }
 
 
+
+        function updateSumsByPeriod(period) {
+            if (!lastFilledDate || json.length === 0) return;
+
+            const lastYear = lastFilledDate.getFullYear();
+            const lastMonth = lastFilledDate.getMonth();
+            const lastDay = lastFilledDate.getDate();
+
+            let sum18 = 0; // Кун бошида колдик (колонка S)
+            let sum19 = 0; // Кун охирида колдик (колонка T)
+            let sum20 = 0; // Технологик юкотиш (колонка U)
+
+            let ishlabChiqarishSum = 0;
+            let birjagaYuklashSum = 0;
+            let eksportSum = 0;
+
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (!row || !row[0]) continue;
+
+                const excelDate = row[0];
+                const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+                if (isNaN(dateCell)) continue;
+
+                const sameDay = dateCell.getFullYear() === lastYear && dateCell.getMonth() === lastMonth && dateCell.getDate() === lastDay;
+                const sameMonth = dateCell.getFullYear() === lastYear && dateCell.getMonth() === lastMonth;
+                const sameYear = dateCell.getFullYear() === lastYear;
+
+                let match = false;
+                if (period === 'day' && sameDay) match = true;
+                if (period === 'month' && sameMonth) match = true;
+                if (period === 'year' && sameYear) match = true;
+
+                if (match) {
+                    // S, T, U колонки
+                    sum18 += parseFloat(row[18]) || 0;
+                    sum19 += parseFloat(row[19]) || 0;
+                    sum20 += parseFloat(row[20]) || 0;
+
+                    const category = row[3];
+                    const value = parseFloat(row[7]); // колонка H
+
+                    if (category === "Ишлаб чиқариш" && !isNaN(value)) {
+                        ishlabChiqarishSum += value;
+                    }
+                    if (category === "Биржага юклаш" && !isNaN(value)) {
+                        birjagaYuklashSum += value;
+                    }
+                    if (category === "Экспорт" && !isNaN(value)) {
+                        eksportSum += value;
+                    }
+                }
+            }
+
+            // Обновление значений в DOM
+            document.getElementById('s-column-sum').innerText = sum18.toFixed(2);
+            document.getElementById('s-column-sum1').innerText = sum19.toFixed(2);
+            document.getElementById('s-column-sum2').innerText = sum20.toFixed(2);
+
+            document.getElementById('sum-text').innerText = ishlabChiqarishSum.toFixed(2);
+            document.getElementById('sum-text1').innerText = birjagaYuklashSum.toFixed(2);
+            document.getElementById('sum-text2').innerText = eksportSum.toFixed(2);
+        }
+
+        document.getElementById("last-day-btn").addEventListener("click", function () {
+            updateFactoryTableByPeriod("day");
+            updateSumsByPeriod("day"); // 👈 добавлено
+        });
+
+        document.getElementById("last-month-btn").addEventListener("click", function () {
+            updateFactoryTableByPeriod("month");
+            updateSumsByPeriod("month"); // 👈 добавлено
+        });
+
+        document.getElementById("last-year-btn").addEventListener("click", function () {
+            updateFactoryTableByPeriod("year");
+            updateSumsByPeriod("year"); // 👈 добавлено
+        });
+
+
         let uzbekneftgazSum = 0;
         let otherSum = 0;
 
@@ -592,6 +672,103 @@ document.getElementById('file-input').addEventListener('change', (event) => {
             document.getElementById('s-column-sum').innerText = sColumnSum.toFixed(2);
 
         });
+
+
+
+        function updateSummariesWithCategory(selectedCategory) {
+            if (!lastFilledDate) return;
+
+            let dayPlan = 0, dayActual = 0, dayMid = 0;
+            let monthPlan = 0, monthActual = 0, monthMid = 0;
+            let yearPlan = 0, yearActual = 0, yearMid = 0;
+
+            const lastDay = lastFilledDate.getDate();
+            const lastMonth = lastFilledDate.getMonth();
+            const lastYear = lastFilledDate.getFullYear();
+
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (!row || !row[0] || row[3] !== selectedCategory) continue;
+
+                const excelDate = row[0];
+                const dateCell = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+                if (isNaN(dateCell)) continue;
+
+                const plan = parseFloat(row[6]) || 0;
+                const actual = parseFloat(row[7]) || 0;
+                const mid = parseFloat(row[8]) || 0;
+
+                if (dateCell.getFullYear() === lastYear) {
+                    yearPlan += plan;
+                    yearActual += actual;
+                    yearMid += mid;
+
+                    if (dateCell.getMonth() === lastMonth) {
+                        monthPlan += plan;
+                        monthActual += actual;
+                        monthMid += mid;
+
+                        if (dateCell.getDate() === lastDay) {
+                            dayPlan += plan;
+                            dayActual += actual;
+                            dayMid += mid;
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('day-plan').innerText = dayPlan.toFixed(2);
+            document.getElementById('day-actual').innerText = dayActual.toFixed(2);
+            document.getElementById('day-mid').innerText = dayMid.toFixed(2);
+
+            document.getElementById('month-plan').innerText = monthPlan.toFixed(2);
+            document.getElementById('month-actual').innerText = monthActual.toFixed(2);
+            document.getElementById('month-mid').innerText = monthMid.toFixed(2);
+
+            document.getElementById('year-plan').innerText = yearPlan.toFixed(2);
+            document.getElementById('year-actual').innerText = yearActual.toFixed(2);
+            document.getElementById('year-mid').innerText = yearMid.toFixed(2);
+        }
+
+
+        document.querySelectorAll('.dobichabtn').forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedCategory = button.dataset.category;
+                updateSummariesWithCategory(selectedCategory);
+            });
+        });
+
+
+
+        document.querySelectorAll('.checkbox').forEach(checkbox => {
+            checkbox.addEventListener('click', function () {
+                const isActive = this.classList.contains('active');
+
+                // Снимаем выбор, если уже активен
+                if (isActive) {
+                    this.classList.remove('active');
+                    document.querySelectorAll('.checkbox').forEach(btn => {
+                        btn.classList.remove('disabled');
+                    });
+                    // здесь можно вызывать функцию фильтрации с "сбросом"
+                    resetCompanyFilter(); // функция должна снять фильтр
+                } else {
+                    // Делаем текущий активным
+                    document.querySelectorAll('.checkbox').forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.classList.add('disabled');
+                    });
+                    this.classList.add('active');
+                    this.classList.remove('disabled');
+
+                    // Получаем значение фильтра
+                    const company = this.id === 'neft' ? 'Ўзбекнефтгаз' : (this.id === 'xk' ? 'xk' : 'summary');
+                    applyCompanyFilter(company); // функция должна фильтровать по компании
+                }
+            });
+        });
+
+
 
 
 
@@ -900,10 +1077,15 @@ function updateFactoryTableByPeriod(period) {
         const sameMonth = dateCell.getFullYear() === lastYear && dateCell.getMonth() === lastMonth;
         const sameYear = dateCell.getFullYear() === lastYear;
 
+        // ✅ добавлено условие по колонке D: только "Ишлаб чиқариш"
+        const category = row[3];
+        const isProduction = category === "Ишлаб чиқариш";
+
         if (
-            (period === 'day' && sameDay) ||
-            (period === 'month' && sameMonth) ||
-            (period === 'year' && sameYear)
+            ((period === 'day' && sameDay) ||
+                (period === 'month' && sameMonth) ||
+                (period === 'year' && sameYear)) &&
+            isProduction
         ) {
             targetRows.push(row);
         }
@@ -919,10 +1101,8 @@ function updateFactoryTableByPeriod(period) {
     let tableRows = "";
 
     companies.forEach(company => {
-        // собираем все строки этой компании
         const companyRows = targetRows.filter(row => row[1] === company);
 
-        // суммируем нужные значения
         let sumF = 0, sumG = 0, sumH = 0, sumQ = 0, sumR = 0;
 
         companyRows.forEach(row => {
@@ -933,7 +1113,6 @@ function updateFactoryTableByPeriod(period) {
             sumR += parseFloat(row[17]) || 0;
         });
 
-        // Применяем форматирование с пробелами для тысяч
         const formattedSumF = sumF.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         const formattedSumG = sumG.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         const formattedSumH = sumH.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
@@ -954,6 +1133,7 @@ function updateFactoryTableByPeriod(period) {
 
     document.getElementById("company-table-body").innerHTML = tableRows;
 }
+
 
 document.getElementById('last-day-btn').addEventListener('click', () => {
     updateFactoryTableByPeriod('day');
@@ -1029,5 +1209,3 @@ document.getElementById('file-input').addEventListener('change', function () {
     // Название файла не будет отображаться
     console.log('Файл загружен, но не показывается в интерфейсе.');
 });
-
-
