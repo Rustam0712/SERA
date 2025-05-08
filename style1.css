@@ -504,11 +504,11 @@ button.newinfo:hover {
 }
 
 .probel {
-  width: 1258px;
+  width: 1246px;
   height: 20px;
   background-color: white;
   position: absolute;
-  top: 50%;
+  top: 57.2%;
   z-index: 50;
   background-color: #142437;
   border-bottom: 1px solid #34495e;
@@ -527,8 +527,8 @@ button.newinfo:hover {
     
     position: absolute;
     margin-top: 120px;
-    width: 1258px;
-    height: 350px;
+    width: 1246px;
+    height: 430px;
     z-index: 10;
 }
 
@@ -660,7 +660,7 @@ select {
   border-radius: 12px;
   /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.4); */
   width: 130%;
-  height: 120%;
+  height: 100%;
   /* border: 1px solid black; */
 }
 
@@ -672,9 +672,9 @@ select {
   flex-direction: column;
   /* border: 2px solid white;;s */
   position: absolute;
-  top: 52%;
-  width: 1225px;
-  left: 13.8%;
+  top: 57%;
+  width: 1210px;
+  left: 13.3%;
   height: 470px;
 }
 

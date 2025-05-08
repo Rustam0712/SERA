@@ -183,9 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
 
-            const sheet = workbook.Sheets['Сера'];
+            const sheet = workbook.Sheets['СУГ'];
             if (!sheet) {
-                alert("Лист 'Сера' не найден в Excel-файле.");
+                alert("Лист 'СУГ' не найден в Excel-файле.");
                 return;
             }
 
@@ -202,7 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(error);
         });
 });
-
 
 function al() {
     if (lastFilledDate) {
@@ -828,7 +827,6 @@ function al() {
         });
     }
 }
-
 
 // ✅ Фильтрация при выборе категории и компании
 document.querySelectorAll('.category-btn').forEach(button => {
