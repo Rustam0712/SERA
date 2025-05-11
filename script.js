@@ -187,10 +187,3 @@ document.getElementById('last-month-btn').addEventListener('click', () => {
 document.getElementById('last-year-btn').addEventListener('click', () => {
     updateFactoryTableByPeriod('year');
 });
-
-window.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('date-picker');
-    const today = new Date();
-    const formatted = today.toLocaleDateString('ru-RU'); // формат: дд.мм.гггг
-    input.value = formatted;
-});

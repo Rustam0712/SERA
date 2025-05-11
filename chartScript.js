@@ -28,67 +28,91 @@ document.getElementById('last-year-btn').addEventListener('click', () => {
 });
 
 
-function updateDonutChart(period) {
-    let uzbekneftgazSum = 0;
-    let otherSum = 0;
+// 👇 Эта функция вызывается при загрузке и при смене dobichabtn
+function updateDonutChart(selectedType) {
+    if (!json || !json.length) return;
 
-    if (!lastFilledDate) {
-        document.getElementById('uzbekneftgazsum').innerText = '0';
-        document.getElementById('other-sum').innerText = '0';
-        return;
-    }
-
-    const lastDay = lastFilledDate.getDate();
-    const lastMonth = lastFilledDate.getMonth();
-    const lastYear = lastFilledDate.getFullYear();
-
-    for (let i = 1; i < json.length; i++) {
-        const row = json[i];
-        if (!row || row.length < 8 || !row[0] || !row[2] || !row[3]) continue;
-
-        const excelDate = row[0];
-        const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
-        if (isNaN(dateCell)) continue;
-
-        const company = row[2].trim();
-        const category = row[3].trim();
-        const value = parseFloat(row[7]) || 0;
-
-        if (category !== "Ишлаб чиқариш") continue;
-
-        const rowDay = dateCell.getDate();
-        const rowMonth = dateCell.getMonth();
-        const rowYear = dateCell.getFullYear();
-
-        let match = false;
-        if (period === 'day' && rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
-            match = true;
-        } else if (period === 'month' && rowYear === lastYear && rowMonth === lastMonth) {
-            match = true;
-        } else if (period === 'year' && rowYear === lastYear) {
-            match = true;
+    // Получаем последнюю дату из колонки A
+    let lastDate = null;
+    for (let i = json.length - 1; i >= 1; i--) {
+        const date = json[i][0];
+        if (date) {
+            lastDate = date;
+            break;
         }
+    }
+    if (!lastDate) return;
 
-        if (match && !isNaN(value)) {
-            if (company === "Ўзбекнефтгаз") {
-                uzbekneftgazSum += value;
-            } else {
-                otherSum += value;
+    let uzbekneftegazTotal = 0;
+    let othersTotal = 0;
+
+    json.forEach((row, index) => {
+        if (index === 0) return; // пропустить заголовок
+
+        const date = row[0];
+        const companyType = row[2]?.trim(); // колонка C
+        const type = row[3]?.trim();        // колонка D
+        const value = parseFloat(row[7]) || 0; // колонка H
+
+        if (date !== lastDate || type !== selectedType) return;
+
+        if (companyType === "Ўзбекнефтгаз") {
+            uzbekneftegazTotal += value;
+        } else {
+            othersTotal += value;
+        }
+    });
+
+    const total = uzbekneftegazTotal + othersTotal;
+
+    // Обновление DOM
+    const format = (val) => val.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+    document.getElementById('uzbekneftgazsum').innerText = format(uzbekneftegazTotal);
+    document.getElementById('other-sum').innerText = format(othersTotal);
+    document.querySelector('.donut .center').innerText = format(total);
+}
+
+function setLastExcelDateToCalendar() {
+    if (!json || !json.length) return;
+
+    let lastValidDate = null;
+
+    for (let i = json.length - 1; i >= 1; i--) {
+        const rawDate = json[i][0]; // колонка A
+        if (typeof rawDate === "string" && rawDate.includes(".")) {
+            const [day, month, year] = rawDate.split(".");
+            if (day && month && year) {
+                // Преобразуем строку в объект Date
+                const fullYear = year.length === 2 ? "20" + year : year;
+                const parsedDate = new Date(`${fullYear}-${month}-${day}`);
+                if (!isNaN(parsedDate)) {
+                    lastValidDate = parsedDate;
+                    break;
+                }
             }
         }
     }
 
-    // форматируем в зависимости от периода
-    const format = period === 'day' ? (v) => v.toFixed(1) : (v) => v.toFixed(0);
+    if (!lastValidDate) return;
 
-    document.getElementById('uzbekneftgazsum').innerText = format(uzbekneftgazSum);
-    document.getElementById('other-sum').innerText = format(otherSum);
-    // Вывод суммы в центр круга
-    const totalSum = uzbekneftgazSum + otherSum;
-    document.querySelector('.donut .center').innerText = format(totalSum);
+    // Преобразуем в формат YYYY-MM-DD для input
+    const formatted = lastValidDate.toISOString().split("T")[0];
 
+    const dateInput = document.getElementById("date-picker");
+    if (dateInput) {
+        dateInput.value = formatted;
+        if (dateInput._flatpickr) {
+            dateInput._flatpickr.setDate(lastValidDate);
+        }
+    }
+
+    // Для других функций (если нужно глобально)
+    lastFilledDate = lastValidDate;
+
+
+    console.log(lastValidDate);
 }
-
 
 
 
@@ -194,8 +218,10 @@ document.addEventListener("DOMContentLoaded", () => {
             lastFilledDate = null;
 
             drawChart(filterData("Общий", null, null));
+            setLastExcelDateToCalendar();
             updateSummaries();
             al();
+
         })
         .catch(error => {
             alert("Ошибка при загрузке Excel: " + error.message);
@@ -331,6 +357,20 @@ function al() {
         console.log("Биржага юклаш сумма:", birjagaYuklashSum);
         console.log("Экспорт:", eksportSum);
     }
+
+    const dobichaBtns = document.querySelectorAll('.dobichabtn');
+    dobichaBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const selectedType = btn.innerText.trim();
+            updateDonutChart(selectedType);
+        });
+    });
+
+    // При загрузке по умолчанию
+    updateDonutChart("Ишлаб чиқариш");
+
+
+
 
 
 
@@ -574,9 +614,6 @@ function al() {
             updateFactoryTableByCategory(category);
         });
     });
-
-
-
 
 
     document.getElementById("factory_date").addEventListener("click", () => {
@@ -827,6 +864,9 @@ function al() {
             }
         });
     }
+
+
+
 }
 
 
@@ -1213,3 +1253,8 @@ document.getElementById('file-input').addEventListener('change', function () {
     // Название файла не будет отображаться
     console.log('Файл загружен, но не показывается в интерфейсе.');
 });
+
+
+
+const formattedLastDate = lastFilledDate.toLocaleDateString("ru-RU"); // например "11.05.2025"
+document.getElementById("date-picker").value = formattedLastDate;

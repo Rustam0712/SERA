@@ -758,3 +758,31 @@ select {
   background-color: #d32f2f; /* темнее при наведении */
 }
 
+.toggle-switch {
+  display: inline-flex;
+  border: 1px solid #004080;
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+
+.toggle-btn {
+  padding: 6px 30px;
+  text-decoration: none;
+  color: #004080;
+  /* background-color: black; */
+  border: none;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.toggle-btn:not(.active):hover {
+  background-color: black;
+  color: white;
+}
+
+.toggle-btn.active {
+  background-color: #004080;
+  color: white;
+  pointer-events: none;
+}
