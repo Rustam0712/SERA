@@ -27,92 +27,107 @@ document.getElementById('last-year-btn').addEventListener('click', () => {
     updateDonutChart('year');
 });
 
+let currentCategory = "Ишлаб чиқариш"; // По умолчанию
+let currentPeriod = "day"; // По умолчанию — last-day-btn
 
-// 👇 Эта функция вызывается при загрузке и при смене dobichabtn
-function updateDonutChart(selectedType) {
-    if (!json || !json.length) return;
+function updateDonutChart() {
+    let uzbekneftgazSum = 0;
+    let otherSum = 0;
 
-    // Получаем последнюю дату из колонки A
-    let lastDate = null;
-    for (let i = json.length - 1; i >= 1; i--) {
-        const date = json[i][0];
-        if (date) {
-            lastDate = date;
-            break;
-        }
+    if (!lastFilledDate) {
+        document.getElementById('uzbekneftgazsum').innerText = '0';
+        document.getElementById('other-sum').innerText = '0';
+        document.querySelector('.donut .center').innerText = '0';
+        return;
     }
-    if (!lastDate) return;
 
-    let uzbekneftegazTotal = 0;
-    let othersTotal = 0;
+    const lastDay = lastFilledDate.getDate();
+    const lastMonth = lastFilledDate.getMonth();
+    const lastYear = lastFilledDate.getFullYear();
 
-    json.forEach((row, index) => {
-        if (index === 0) return; // пропустить заголовок
+    for (let i = 1; i < json.length; i++) {
+        const row = json[i];
+        if (!row || row.length < 8 || !row[0] || !row[2] || !row[3]) continue;
 
-        const date = row[0];
-        const companyType = row[2]?.trim(); // колонка C
-        const type = row[3]?.trim();        // колонка D
-        const value = parseFloat(row[7]) || 0; // колонка H
+        const excelDate = row[0];
+        const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
+        if (isNaN(dateCell)) continue;
 
-        if (date !== lastDate || type !== selectedType) return;
+        const company = row[2].trim();
+        const category = row[3].trim();
+        const value = parseFloat(row[7]) || 0;
 
-        if (companyType === "Ўзбекнефтгаз") {
-            uzbekneftegazTotal += value;
-        } else {
-            othersTotal += value;
+        if (category !== currentCategory) continue;
+
+        const rowDay = dateCell.getDate();
+        const rowMonth = dateCell.getMonth();
+        const rowYear = dateCell.getFullYear();
+
+        let match = false;
+        if (currentPeriod === 'day' && rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
+            match = true;
+        } else if (currentPeriod === 'month' && rowYear === lastYear && rowMonth === lastMonth) {
+            match = true;
+        } else if (currentPeriod === 'year' && rowYear === lastYear) {
+            match = true;
         }
-    });
 
-    const total = uzbekneftegazTotal + othersTotal;
-
-    // Обновление DOM
-    const format = (val) => val.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-
-    document.getElementById('uzbekneftgazsum').innerText = format(uzbekneftegazTotal);
-    document.getElementById('other-sum').innerText = format(othersTotal);
-    document.querySelector('.donut .center').innerText = format(total);
-}
-
-function setLastExcelDateToCalendar() {
-    if (!json || !json.length) return;
-
-    let lastValidDate = null;
-
-    for (let i = json.length - 1; i >= 1; i--) {
-        const rawDate = json[i][0]; // колонка A
-        if (typeof rawDate === "string" && rawDate.includes(".")) {
-            const [day, month, year] = rawDate.split(".");
-            if (day && month && year) {
-                // Преобразуем строку в объект Date
-                const fullYear = year.length === 2 ? "20" + year : year;
-                const parsedDate = new Date(`${fullYear}-${month}-${day}`);
-                if (!isNaN(parsedDate)) {
-                    lastValidDate = parsedDate;
-                    break;
-                }
+        if (match && !isNaN(value)) {
+            if (company === "Ўзбекнефтгаз") {
+                uzbekneftgazSum += value;
+            } else if (company === "Хорижий ва ҚК") {
+                otherSum += value;
             }
         }
     }
 
-    if (!lastValidDate) return;
+    const format = currentPeriod === 'day' ? (v) => v.toFixed(1) : (v) => v.toFixed(0);
 
-    // Преобразуем в формат YYYY-MM-DD для input
-    const formatted = lastValidDate.toISOString().split("T")[0];
-
-    const dateInput = document.getElementById("date-picker");
-    if (dateInput) {
-        dateInput.value = formatted;
-        if (dateInput._flatpickr) {
-            dateInput._flatpickr.setDate(lastValidDate);
-        }
-    }
-
-    // Для других функций (если нужно глобально)
-    lastFilledDate = lastValidDate;
-
-
-    console.log(lastValidDate);
+    document.getElementById('uzbekneftgazsum').innerText = format(uzbekneftgazSum);
+    document.getElementById('other-sum').innerText = format(otherSum);
+    document.querySelector('.donut .center').innerText = format(uzbekneftgazSum + otherSum);
 }
+// dobichabtn — выбираем категорию
+document.querySelectorAll(".dobichabtn").forEach(button => {
+    button.addEventListener("click", () => {
+        currentCategory = button.dataset.category?.trim() || button.innerText.trim();
+        updateDonutChart();
+    });
+});
+
+// Кнопки периода
+document.getElementById("last-day-btn")?.addEventListener("click", () => {
+    currentPeriod = "day";
+    updateDonutChart();
+});
+document.getElementById("last-month-btn")?.addEventListener("click", () => {
+    currentPeriod = "month";
+    updateDonutChart();
+});
+document.getElementById("last-year-btn")?.addEventListener("click", () => {
+    currentPeriod = "year";
+    updateDonutChart();
+});
+document.querySelectorAll(".dobichabtn").forEach(button => {
+    button.addEventListener("click", () => {
+        currentCategory = button.dataset.category?.trim() || button.innerText.trim();
+        updateDonutChart();
+
+        // Меняем заголовок
+        const titleMap = {
+            "Ишлаб чиқариш": "Ишлаб чикариш улуши",
+            "Биржага юклаш": "Биржага юклаш улуши",
+            "Экспорт": "Экспорт улуши",
+            "Кун бошида колдик": "Кун бошида колдик улуши"
+        };
+
+        const newTitle = titleMap[currentCategory] || "Олтингугурт улуши";
+        document.getElementById("donut-title").innerText = newTitle;
+    });
+});
+
+
+
 
 
 
@@ -218,10 +233,8 @@ document.addEventListener("DOMContentLoaded", () => {
             lastFilledDate = null;
 
             drawChart(filterData("Общий", null, null));
-            setLastExcelDateToCalendar();
             updateSummaries();
             al();
-
         })
         .catch(error => {
             alert("Ошибка при загрузке Excel: " + error.message);
@@ -357,20 +370,6 @@ function al() {
         console.log("Биржага юклаш сумма:", birjagaYuklashSum);
         console.log("Экспорт:", eksportSum);
     }
-
-    const dobichaBtns = document.querySelectorAll('.dobichabtn');
-    dobichaBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const selectedType = btn.innerText.trim();
-            updateDonutChart(selectedType);
-        });
-    });
-
-    // При загрузке по умолчанию
-    updateDonutChart("Ишлаб чиқариш");
-
-
-
 
 
 
@@ -616,6 +615,9 @@ function al() {
     });
 
 
+
+
+
     document.getElementById("factory_date").addEventListener("click", () => {
         const selectedDate = getSelectedDate();
         if (!selectedDate) {
@@ -782,22 +784,82 @@ function al() {
         });
     });
 
+    function generateFactoryTable() {
+        let tableRows = "";
+
+        companies.forEach(company => {
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (row[1] === company) {
+                    const colF = row[23] || "";
+                    const colG = row[6] || "";
+                    const colH = row[7] || "";
+                    const colQ = row[16] || "";
+                    const colR = row[24] || "";
+                    const companyType = row[2] || ""; // колонка C
+
+                    const formattedColF = typeof colF === "number" ? colF.toFixed(2) : colF;
+                    const formattedColG = typeof colG === "number" ? colG.toFixed(2) : colG;
+                    const formattedColH = typeof colH === "number" ? colH.toFixed(2) : colH;
+                    const formattedColQ = typeof colQ === "number" ? colQ.toFixed(2) : colQ;
+                    const formattedColR = typeof colR === "number" ? colR.toFixed(2) : colR;
+
+                    tableRows += `
+                        <tr data-company-type="${companyType}">
+                            <td>${company}</td>
+                            <td>${formattedColF}</td>
+                            <td>${formattedColG}</td>
+                            <td>${formattedColH}</td>
+                            <td>${formattedColQ}</td>
+                            <td>${formattedColR}</td>
+                        </tr>
+                    `;
+                    break;
+                }
+            }
+        });
+
+        document.getElementById("company-table-body").innerHTML = tableRows;
+    }
+
+
+
+    function applyCompanyFilter(filterType) {
+        const rows = document.querySelectorAll("#company-table-body tr");
+
+        rows.forEach(row => {
+            const companyType = row.getAttribute("data-company-type");
+
+            let shouldKeep = false;
+            if (filterType === "neft") {
+                shouldKeep = companyType === "Ўзбекнефтгаз";
+            } else if (filterType === "xk") {
+                shouldKeep = companyType === "Хорижий ва ҚК";
+            } else if (filterType === "summary") {
+                shouldKeep = true;
+            }
+
+            if (!shouldKeep) {
+                row.remove(); // удаляем строку
+            }
+        });
+    }
+    function resetCompanyFilter() {
+        generateFactoryTable(); // перерисовываем всё заново
+    }
 
 
     document.querySelectorAll('.checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function () {
             const isActive = this.classList.contains('active');
 
-            // Снимаем выбор, если уже активен
             if (isActive) {
+                // Сброс фильтра
                 this.classList.remove('active');
-                document.querySelectorAll('.checkbox').forEach(btn => {
-                    btn.classList.remove('disabled');
-                });
-                // здесь можно вызывать функцию фильтрации с "сбросом"
-                resetCompanyFilter(); // функция должна снять фильтр
+                document.querySelectorAll('.checkbox').forEach(btn => btn.classList.remove('disabled'));
+                resetCompanyFilter(); // показать все строки снова
             } else {
-                // Делаем текущий активным
+                // Активируем только выбранную кнопку
                 document.querySelectorAll('.checkbox').forEach(btn => {
                     btn.classList.remove('active');
                     btn.classList.add('disabled');
@@ -805,12 +867,13 @@ function al() {
                 this.classList.add('active');
                 this.classList.remove('disabled');
 
-                // Получаем значение фильтра
-                const company = this.id === 'neft' ? 'Ўзбекнефтгаз' : (this.id === 'xk' ? 'xk' : 'summary');
-                applyCompanyFilter(company); // функция должна фильтровать по компании
+                // Определяем фильтр
+                const filterType = this.id;
+                applyCompanyFilter(filterType); // фильтруем таблицу
             }
         });
     });
+
 
 
 
@@ -864,9 +927,6 @@ function al() {
             }
         });
     }
-
-
-
 }
 
 
@@ -956,8 +1016,8 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
 
 
 // 📈 Отрисовка графика
-function drawChart({ map2024, map2025 }) {
-    const chartData = [['Дата', '2024', '2025']];
+function drawChart({ map2024, map2025, lastFilledDate }) {
+    const chartData = [['Дата', '2024', { type: 'string', role: 'annotation' }, '2025', { type: 'string', role: 'annotation' }]];
 
     for (let m = 1; m <= 12; m++) {
         for (let d = 1; d <= 31; d++) {
@@ -968,7 +1028,16 @@ function drawChart({ map2024, map2025 }) {
             if (val2024 !== null || val2025 !== null) {
                 const date = new Date(2025, m - 1, d);
                 if (!lastFilledDate || date <= lastFilledDate) {
-                    chartData.push([date, val2024 ?? 0, val2025 ?? 0]);
+                    // Показ аннотаций каждые 5 дней
+                    const showAnnotation = d % 5 === 0;
+                    const anno2024 = showAnnotation && val2024 != null ? val2024.toFixed(0) : null;
+                    const anno2025 = showAnnotation && val2025 != null ? val2025.toFixed(0) : null;
+
+                    chartData.push([
+                        date,
+                        val2024 ?? 0, anno2024,
+                        val2025 ?? 0, anno2025
+                    ]);
                 }
             }
         }
@@ -984,13 +1053,24 @@ function drawChart({ map2024, map2025 }) {
             textStyle: { color: '#ffffff' }
         },
         hAxis: {
-            format: 'MMM dd',
-            gridlines: { count: 12, color: '#444' },
-            textStyle: { color: '#ffffff' }
+            textPosition: 'none', // скрываем подписи X
+            gridlines: {
+                color: 'transparent' // очень светло-серая
+            }
         },
         vAxis: {
-            gridlines: { color: '#444' },
-            textStyle: { color: '#ffffff' }
+            textPosition: 'none', // скрываем Y-ось
+            gridlines: {
+                color: 'transparent' // очень светло-серая
+            }
+        },
+        annotations: {
+            alwaysOutside: true,
+            textStyle: {
+                fontSize: 14,
+                color: '#ffffff',
+                auraColor: 'none'
+            }
         },
         colors: ['#dc3912', '#3366cc'],
         animation: {
@@ -1001,13 +1081,14 @@ function drawChart({ map2024, map2025 }) {
         backgroundColor: 'transparent',
         titleTextStyle: { color: '#ffffff', fontSize: 16 },
         isStacked: false,
-        areaOpacity: 0.2 // это делает "тень" под линиями
+        areaOpacity: 0.2
     };
-
 
     const chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
     chart.draw(data, options);
 }
+
+
 
 // 📅 flatpickr для выбора даты
 flatpickr("#date-picker", {
@@ -1253,8 +1334,3 @@ document.getElementById('file-input').addEventListener('change', function () {
     // Название файла не будет отображаться
     console.log('Файл загружен, но не показывается в интерфейсе.');
 });
-
-
-
-const formattedLastDate = lastFilledDate.toLocaleDateString("ru-RU"); // например "11.05.2025"
-document.getElementById("date-picker").value = formattedLastDate;
