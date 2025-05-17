@@ -115,10 +115,10 @@ document.querySelectorAll(".dobichabtn").forEach(button => {
 
         // Меняем заголовок
         const titleMap = {
-            "Ишлаб чиқариш": "Ишлаб чикариш улуши",
-            "Биржага юклаш": "Биржага юклаш улуши",
-            "Экспорт": "Экспорт улуши",
-            "Кун бошида колдик": "Кун бошида колдик улуши"
+            "Ишлаб чиқариш": "Ишлаб чикариш",
+            "Биржага юклаш": "Биржага юклаш",
+            "Экспорт": "Экспорт",
+            "Кун бошида колдик": "Кун бошида колдик"
         };
 
         const newTitle = titleMap[currentCategory] || "Олтингугурт улуши";
@@ -134,15 +134,13 @@ document.querySelectorAll(".dobichabtn").forEach(button => {
 
 function updateSummaries() {
     if (!lastFilledDate) {
-        document.getElementById('day-plan').innerText = '0';
-        document.getElementById('day-actual').innerText = '0';
-        document.getElementById('day-mid').innerText = '0';
-        document.getElementById('month-plan').innerText = '0';
-        document.getElementById('month-actual').innerText = '0';
-        document.getElementById('month-mid').innerText = '0';
-        document.getElementById('year-plan').innerText = '0';
-        document.getElementById('year-actual').innerText = '0';
-        document.getElementById('year-mid').innerText = '0';
+        ['day-plan', 'day-actual', 'day-mid',
+         'month-plan', 'month-actual', 'month-mid',
+         'year-plan', 'year-actual', 'year-mid'
+        ].forEach(id => {
+            document.getElementById(id).innerHTML = '0';
+            document.getElementById(id).style.color = 'white'; // белый текст
+        });
         return;
     }
 
@@ -158,7 +156,6 @@ function updateSummaries() {
         const row = json[i];
         if (!row || row.length < 9 || !row[0]) continue;
 
-        // ❗ Проверяем колонку D на соответствие выбранной категории
         if ((row[3] || '').trim() !== selectedCategory) continue;
 
         const excelDate = row[0];
@@ -192,18 +189,42 @@ function updateSummaries() {
         }
     }
 
-    document.getElementById('day-plan').innerText = dayPlan.toFixed(2);
-    document.getElementById('day-actual').innerText = dayActual.toFixed(2);
-    document.getElementById('day-mid').innerText = dayMid.toFixed(2);
+    // Просто белый текст (без иконок и цвета)
+    setPlainValue('day-plan', dayPlan);
+    setPlainValue('day-actual', dayActual);
+    setMidValue('day-mid', dayMid);
 
-    document.getElementById('month-plan').innerText = monthPlan.toFixed(2);
-    document.getElementById('month-actual').innerText = monthActual.toFixed(2);
-    document.getElementById('month-mid').innerText = monthMid.toFixed(2);
+    setPlainValue('month-plan', monthPlan);
+    setPlainValue('month-actual', monthActual);
+    setMidValue('month-mid', monthMid);
 
-    document.getElementById('year-plan').innerText = yearPlan.toFixed(2);
-    document.getElementById('year-actual').innerText = yearActual.toFixed(2);
-    document.getElementById('year-mid').innerText = yearMid.toFixed(2);
+    setPlainValue('year-plan', yearPlan);
+    setPlainValue('year-actual', yearActual);
+    setMidValue('year-mid', yearMid);
 }
+
+// Функция без треугольников, белый текст
+function setPlainValue(elementId, value) {
+    const element = document.getElementById(elementId);
+    element.innerText = value.toFixed(2);
+    element.style.color = 'white';
+}
+
+// Только для mid — с цветом и ▲/▼
+function setMidValue(elementId, value) {
+    const element = document.getElementById(elementId);
+    const rounded = value.toFixed(2);
+
+    if (value > 0) {
+        element.innerHTML = `<span style="color:green">${rounded} ▲</span>`;
+    } else if (value < 0) {
+        element.innerHTML = `<span style="color:red">${rounded} ▼</span>`;
+    } else {
+        element.innerHTML = `<span style="color:white">${rounded}</span>`;
+    }
+}
+
+
 
 
 
@@ -509,7 +530,7 @@ function al() {
                 const colG = row[6] || "";
                 const colH = row[7] || "";
                 const colQ = row[16] || "";
-                const colR = row[24] || "";
+                const colR = formatMidValue(row[24]) || "";
                 const companyType = row[2] || ""; // колонка C
                 console.log('ColF: ', colF, ', ColR: ', colR);
 
@@ -575,7 +596,7 @@ function al() {
                     const colG = row[6] || "";
                     const colH = row[7] || "";
                     const colQ = row[16] || "";
-                    const colR = row[24] || "";
+                    const colR = formatMidValue(row[24]) || "";
                     const companyType = row[2] || ""; // колонка C
                     console.log('ColF: ', colF, ', ColR: ', colR);
 
@@ -614,7 +635,19 @@ function al() {
         });
     });
 
-
+    function formatMidValue(value) {
+        const num = parseFloat(value);
+        const formatted = isNaN(num) ? "0.00" : num.toFixed(2);
+    
+        if (num > 0) {
+            return `<span style="color:green">${formatted} ▲</span>`;
+        } else if (num < 0) {
+            return `<span style="color:red">${formatted} ▼</span>`;
+        } else {
+            return `<span style="color:white">${formatted}</span>`;
+        }
+    }
+    
 
 
 
@@ -638,18 +671,24 @@ function al() {
 
         const companies = Array.from(companiesSet);
         let tableRows = "";
-
+        const header = json[0];
+        const targetColumnIndex = header.indexOf("бир кун олдин +/-"); // будет 24
+        const formatNumber = value => {
+            const num = parseFloat(value);
+            return (!isNaN(num) ? num.toFixed(2) : (value ?? ""));
+        };        
+        
         companies.forEach(company => {
             for (let i = 1; i < json.length; i++) {
                 const row = json[i];
                 if (row[0] === targetExcelDate && row[1] === company) {
-                    const colF = row[23] || "";
-                    const colG = row[6] || "";
-                    const colH = row[7] || "";
-                    const colQ = row[16] || "";
-                    const colR = row[24] || "";
-                    const companyType = row[2] || ""; // колонка C
-                    console.log('ColF: ', colF, ', ColR: ', colR);
+                    const colF = formatNumber(row[23]);
+                    const colG = formatNumber(row[6]);
+                    const colH = formatNumber(row[7]);
+                    const colQ = formatMidValue(row[16]);
+                    const colR = formatMidValue(row[24]);
+                    const companyType = row[2] || "";
+        
                     tableRows += `
                     <tr data-company-type="${companyType}">
                         <td>${company}</td>
@@ -664,6 +703,8 @@ function al() {
                 }
             }
         });
+        
+        
 
         document.getElementById("company-table-body").innerHTML = tableRows;
 
@@ -795,7 +836,7 @@ function al() {
                     const colG = row[6] || "";
                     const colH = row[7] || "";
                     const colQ = row[16] || "";
-                    const colR = row[24] || "";
+                    const colR = formatMidValue(row[24]) || "";
                     const companyType = row[2] || ""; // колонка C
 
                     const formattedColF = typeof colF === "number" ? colF.toFixed(2) : colF;
@@ -1017,7 +1058,8 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
 
 // 📈 Отрисовка графика
 function drawChart({ map2024, map2025, lastFilledDate }) {
-    const chartData = [['Дата', '2024', { type: 'string', role: 'annotation' }, '2025', { type: 'string', role: 'annotation' }]];
+    const chartData = [['Дата', 'Фон', '2024', { type: 'string', role: 'annotation' }, '2025', { type: 'string', role: 'annotation' }]];
+    const dateList = [];
 
     for (let m = 1; m <= 12; m++) {
         for (let d = 1; d <= 31; d++) {
@@ -1028,13 +1070,17 @@ function drawChart({ map2024, map2025, lastFilledDate }) {
             if (val2024 !== null || val2025 !== null) {
                 const date = new Date(2025, m - 1, d);
                 if (!lastFilledDate || date <= lastFilledDate) {
-                    // Показ аннотаций каждые 5 дней
+                    dateList.push(date);
+
                     const showAnnotation = d % 5 === 0;
                     const anno2024 = showAnnotation && val2024 != null ? val2024.toFixed(0) : null;
                     const anno2025 = showAnnotation && val2025 != null ? val2025.toFixed(0) : null;
 
+                    const maxVal = Math.max(val2024 ?? 0, val2025 ?? 0);
+
                     chartData.push([
                         date,
+                        maxVal,
                         val2024 ?? 0, anno2024,
                         val2025 ?? 0, anno2025
                     ]);
@@ -1045,23 +1091,57 @@ function drawChart({ map2024, map2025, lastFilledDate }) {
 
     const data = google.visualization.arrayToDataTable(chartData);
 
+    // Определяем формат вывода по оси X
+    let formatPattern = 'LLLL'; // для года
+    let ticks = [];
+
+    if (dateList.length === 1) {
+        formatPattern = 'd MMMM yyyy';
+        ticks = [dateList[0]];
+    } else {
+        const first = dateList[0];
+        const sameMonth = dateList.every(d => d.getMonth() === first.getMonth());
+        const months = new Set(dateList.map(d => d.getMonth()));
+
+        if (sameMonth) {
+            formatPattern = 'dd.MM.yy';
+            ticks = [...dateList];
+        } else if (months.size <= 2) {
+            formatPattern = 'dd.MM.yy';
+            ticks = [...dateList];
+        } else {
+            const usedMonths = new Set();
+            dateList.forEach(d => {
+                const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+                if (!usedMonths.has(monthStart.getMonth())) {
+                    ticks.push(monthStart);
+                    usedMonths.add(monthStart.getMonth());
+                }
+            });
+            formatPattern = 'LLLL';
+        }
+    }
+
     const options = {
-        title: 'Сравнение суточной добычи за 2024 и 2025 гг.',
+        title: 'Сравнение за 2024 и 2025 гг.',
         curveType: 'function',
         legend: {
             position: 'bottom',
             textStyle: { color: '#ffffff' }
         },
         hAxis: {
-            textPosition: 'none', // скрываем подписи X
+            textStyle: { color: '#ffffff' },
             gridlines: {
-                color: 'transparent' // очень светло-серая
-            }
+                count: -1,
+                color: '#4d4d4d' // тёмно-серая сетка
+            },
+            ticks: ticks,
+            format: formatPattern
         },
         vAxis: {
-            textPosition: 'none', // скрываем Y-ось
+            textPosition: 'none',
             gridlines: {
-                color: 'transparent' // очень светло-серая
+                color: '#4d4d4d' // тёмно-серая сетка
             }
         },
         annotations: {
@@ -1072,7 +1152,12 @@ function drawChart({ map2024, map2025, lastFilledDate }) {
                 auraColor: 'none'
             }
         },
-        colors: ['#dc3912', '#3366cc'],
+        colors: ['#2f2f2f', 'green', '#3366cc'],
+        series: {
+            0: { areaOpacity: 0.4, lineWidth: 0 }, // фон
+            1: { areaOpacity: 0.2, lineWidth: 2 }, // 2024
+            2: { areaOpacity: 0.2, lineWidth: 2 }  // 2025
+        },
         animation: {
             duration: 1000,
             easing: 'out',
@@ -1080,13 +1165,16 @@ function drawChart({ map2024, map2025, lastFilledDate }) {
         },
         backgroundColor: 'transparent',
         titleTextStyle: { color: '#ffffff', fontSize: 16 },
-        isStacked: false,
-        areaOpacity: 0.2
+        isStacked: false
     };
 
     const chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
     chart.draw(data, options);
 }
+
+
+
+
 
 
 
