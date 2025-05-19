@@ -1,13 +1,16 @@
 google.charts.load('current', { packages: ['corechart'] });
 
 
-let selectedCategory = 'Ишлаб чиқариш'; // Значение по умолчанию
+let selectedCategory = 'Ишлаб чиқариш';
+console.log("selectedCategory: " + selectedCategory);
 document.querySelectorAll('.dobichabtn').forEach(button => {
     button.addEventListener('click', () => {
         selectedCategory = button.getAttribute('data-category');
-        updateSummaries();
+        console.log("Нажата категория:", selectedCategory); // <--- добавь это для проверки
+        updateSummaries(); // вызывает нужную функцию
     });
 });
+
 
 document.getElementById('last-day-btn').addEventListener('click', () => {
     selectedPeriod = 'day';
@@ -81,12 +84,26 @@ function updateDonutChart() {
         }
     }
 
-    const format = currentPeriod === 'day' ? (v) => v.toFixed(1) : (v) => v.toFixed(0);
+    function formatNumber(num) {
+        if (num >= 1000) {
+            if (num % 1000 === 0) {
+                // Ровное число тысяч
+                return (num / 1000) + ' т.';
+            } else {
+                // Не ровное — с одним десятичным знаком
+                return (num / 1000).toFixed(1) + ' т.';
+            }
+        } else {
+            // Меньше 1000 — показываем с 1 знаком после запятой для day, иначе без десятичных
+            return currentPeriod === 'day' ? num.toFixed(1) : Math.round(num).toString();
+        }
+    }
 
-    document.getElementById('uzbekneftgazsum').innerText = format(uzbekneftgazSum);
-    document.getElementById('other-sum').innerText = format(otherSum);
-    document.querySelector('.donut .center').innerText = format(uzbekneftgazSum + otherSum);
+    document.getElementById('uzbekneftgazsum').innerText = formatNumber(uzbekneftgazSum);
+    document.getElementById('other-sum').innerText = formatNumber(otherSum);
+    document.querySelector('.donut .center').innerText = formatNumber(uzbekneftgazSum + otherSum);
 }
+
 // dobichabtn — выбираем категорию
 document.querySelectorAll(".dobichabtn").forEach(button => {
     button.addEventListener("click", () => {
@@ -126,23 +143,180 @@ document.querySelectorAll(".dobichabtn").forEach(button => {
     });
 });
 
+function renderEndOfDayTable() {
+    if (selectedCategory !== 'Кун охирида колдик') return;
+    if (!lastFilledDate) return;
 
+    const lastDay = lastFilledDate.getDate();
+    const lastMonth = lastFilledDate.getMonth();
+    const lastYear = lastFilledDate.getFullYear();
+
+    const companyData = {};
+
+    for (let i = 1; i < json.length; i++) {
+        const row = json[i];
+        if (!row || !row[0]) continue;
+
+        const date = new Date((row[0] - 25569) * 86400 * 1000);
+        if (isNaN(date)) continue;
+
+        let match = false;
+        if (currentPeriod === 'day') {
+            match = date.getFullYear() === lastYear &&
+                date.getMonth() === lastMonth &&
+                date.getDate() === lastDay;
+        } else if (currentPeriod === 'month') {
+            match = date.getFullYear() === lastYear &&
+                date.getMonth() === lastMonth;
+        } else if (currentPeriod === 'year') {
+            match = date.getFullYear() === lastYear;
+        }
+
+        if (match) {
+            const companyName = row[1]; // колонка B
+            const endValue = parseFloat(row[19]) || 0; // колонка T — индекс 19
+
+            if (companyName) {
+                if (!companyData[companyName]) {
+                    companyData[companyName] = 0;
+                }
+                companyData[companyName] += endValue;
+            }
+        }
+    }
+
+    // Обновляем заголовки таблицы
+    const tableHead = document.querySelector(".factory-table thead");
+    tableHead.innerHTML = `
+        <tr>
+            <th>Корхона номи</th>
+            <th>Кун охирида колдик</th>
+        </tr>
+    `;
+
+    // Заполняем тело таблицы
+    const tbody = document.getElementById("company-table-body");
+    tbody.innerHTML = "";
+
+    for (const [company, value] of Object.entries(companyData)) {
+        tbody.innerHTML += `
+            <tr>
+                <td>${company}</td>
+                <td>${value.toFixed(2)}</td>
+            </tr>
+        `;
+    }
+
+    console.log("Таблица обновлена: Кун охирида колдик (" + currentPeriod + ")");
+}
+
+
+
+
+function renderStartOfDayTable() {
+    if (selectedCategory !== 'Кун бошида колдик') return;
+    if (!lastFilledDate) return;
+
+    const lastDay = lastFilledDate.getDate();
+    const lastMonth = lastFilledDate.getMonth();
+    const lastYear = lastFilledDate.getFullYear();
+
+    const companyData = {};
+
+    for (let i = 1; i < json.length; i++) {
+        const row = json[i];
+        if (!row || !row[0]) continue;
+
+        const date = new Date((row[0] - 25569) * 86400 * 1000);
+        if (isNaN(date)) continue;
+
+        let match = false;
+        if (currentPeriod === 'day') {
+            match = date.getFullYear() === lastYear &&
+                date.getMonth() === lastMonth &&
+                date.getDate() === lastDay;
+        } else if (currentPeriod === 'month') {
+            match = date.getFullYear() === lastYear &&
+                date.getMonth() === lastMonth;
+        } else if (currentPeriod === 'year') {
+            match = date.getFullYear() === lastYear;
+        }
+
+        if (match) {
+            const companyName = row[1]; // колонка B
+            const startValue = parseFloat(row[18]) || 0; // колонка S (индекс 18)
+
+            if (companyName) {
+                if (!companyData[companyName]) {
+                    companyData[companyName] = 0;
+                }
+                companyData[companyName] += startValue;
+            }
+        }
+    }
+
+    // Обновляем заголовок таблицы
+    const tableHead = document.querySelector(".factory-table thead");
+    tableHead.innerHTML = `
+        <tr>
+            <th>Корхона номи</th>
+            <th>Кун бошида колдик</th>
+        </tr>
+    `;
+
+    // Заполняем тело таблицы
+    const tbody = document.getElementById("company-table-body");
+    tbody.innerHTML = "";
+
+    for (const [company, value] of Object.entries(companyData)) {
+        tbody.innerHTML += `
+            <tr>
+                <td>${company}</td>
+                <td>${value.toFixed(2)}</td>
+            </tr>
+        `;
+    }
+
+    console.log("Таблица обновлена: Кун бошида колдик (" + currentPeriod + ")");
+}
+
+function restoreFactoryTableHeader() {
+    const tableHead = document.querySelector(".factory-table thead");
+    tableHead.innerHTML = `
+        <tr>
+            <th>Корхона номи</th>
+            <th>Олдинги кун амалда</th>
+            <th>Режа</th>
+            <th>Амалда</th>
+            <th>+/-</th>
+            <th>+/- олдинги кун</th>
+        </tr>
+    `;
+}
 
 
 
 
 
 function updateSummaries() {
+    // ⛔ Прерываем обновление, если выбрана одна из специальных категорий
+    if (selectedCategory === "Кун бошида колдик" || selectedCategory === "Кун охирида колдик") {
+        return;
+    }
     if (!lastFilledDate) {
         ['day-plan', 'day-actual', 'day-mid',
-         'month-plan', 'month-actual', 'month-mid',
-         'year-plan', 'year-actual', 'year-mid'
+            'month-plan', 'month-actual', 'month-mid',
+            'year-plan', 'year-actual', 'year-mid'
         ].forEach(id => {
             document.getElementById(id).innerHTML = '0';
-            document.getElementById(id).style.color = 'white'; // белый текст
+            document.getElementById(id).style.color = 'white';
         });
         return;
     }
+
+
+
+    restoreFactoryTableHeader(); // восстанавливаем стандартный заголовок таблицы
 
     let dayPlan = 0, dayActual = 0, dayMid = 0;
     let monthPlan = 0, monthActual = 0, monthMid = 0;
@@ -189,7 +363,6 @@ function updateSummaries() {
         }
     }
 
-    // Просто белый текст (без иконок и цвета)
     setPlainValue('day-plan', dayPlan);
     setPlainValue('day-actual', dayActual);
     setMidValue('day-mid', dayMid);
@@ -202,6 +375,7 @@ function updateSummaries() {
     setPlainValue('year-actual', yearActual);
     setMidValue('year-mid', yearMid);
 }
+
 
 // Функция без треугольников, белый текст
 function setPlainValue(elementId, value) {
@@ -318,8 +492,281 @@ function al() {
         document.getElementById('s-column-sum1').innerText = `${sColumnSum.toFixed(2)}`;
         console.log(sColumnSum.toFixed(2));
     }
+    document.getElementById("start-of-day-btn").addEventListener("click", () => {
+        console.log("Нажата кнопка Кун бошида колдик");
+        renderStartOfDayTable(); // вызываем отрисовку таблицы
+        startDonut();
+    });
+    document.getElementById("end-of-day-btn").addEventListener("click", () => {
+        console.log("Нажата кнопка Кун охирида колдик");
+        renderEndOfDayTable(); // вызываем отрисовку таблицы
+        endDonut();
+    });
+
+    function startDonut() {
+        if (selectedCategory !== 'Кун бошида колдик') return;
+        console.log("Selected Category: " + selectedCategory);
+        let uzbekneftgazSum = 0;
+        let otherSum = 0;
+
+        if (!lastFilledDate) {
+            document.getElementById('uzbekneftgazsum').innerText = '0';
+            document.getElementById('other-sum').innerText = '0';
+            document.querySelector('.donut .center').innerText = '0';
+            return;
+        }
+
+        const lastDay = lastFilledDate.getDate();
+        const lastMonth = lastFilledDate.getMonth();
+        const lastYear = lastFilledDate.getFullYear();
+
+        for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            if (!row || row.length < 19 || !row[0] || !row[2]) continue;
+
+            const excelDate = row[0];
+            const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
+            if (isNaN(dateCell)) continue;
+
+            const companyType = row[2].trim(); // колонка C
+            const startOfDayValue = parseFloat(row[18]) || 0; // колонка S
+
+            const rowDay = dateCell.getDate();
+            const rowMonth = dateCell.getMonth();
+            const rowYear = dateCell.getFullYear();
+
+            let match = false;
+            if (currentPeriod === 'day' && rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
+                match = true;
+            } else if (currentPeriod === 'month' && rowYear === lastYear && rowMonth === lastMonth) {
+                match = true;
+            } else if (currentPeriod === 'year' && rowYear === lastYear) {
+                match = true;
+            }
+
+            if (match && !isNaN(startOfDayValue)) {
+                if (companyType === "Ўзбекнефтгаз") {
+                    uzbekneftgazSum += startOfDayValue;
+                } else if (companyType === "Хорижий ва ҚК") {
+                    otherSum += startOfDayValue;
+                }
+            }
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000) {
+                if (num % 1000 === 0) {
+                    return (num / 1000) + ' т.';
+                } else {
+                    return (num / 1000).toFixed(1) + ' т.';
+                }
+            } else {
+                return num.toFixed(0);
+            }
+        }
+
+        document.getElementById('uzbekneftgazsum').innerText = formatNumber(uzbekneftgazSum);
+        document.getElementById('other-sum').innerText = formatNumber(otherSum);
+        document.querySelector('.donut .center').innerText = formatNumber(uzbekneftgazSum + otherSum);
+    }
+
+    function startTechLossDonut() {
+        if (selectedCategory !== 'Технологик юкотиш') return;
+        if (!lastFilledDate) {
+            document.getElementById('uzbekneftgazsum').innerText = '0';
+            document.getElementById('other-sum').innerText = '0';
+            document.querySelector('.donut .center').innerText = '0';
+            return;
+        }
+
+        let uzbekneftgazSum = 0;
+        let otherSum = 0;
+
+        const lastDay = lastFilledDate.getDate();
+        const lastMonth = lastFilledDate.getMonth();
+        const lastYear = lastFilledDate.getFullYear();
+
+        for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            if (!row || row.length < 21 || !row[0] || !row[2]) continue;
+
+            const excelDate = row[0];
+            const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
+            if (isNaN(dateCell)) continue;
+
+            const companyType = row[2].trim(); // колонка C
+            const techLossValue = parseFloat(row[20]) || 0; // колонка U (индекс 20)
+
+            const rowDay = dateCell.getDate();
+            const rowMonth = dateCell.getMonth();
+            const rowYear = dateCell.getFullYear();
+
+            let match = false;
+            if (currentPeriod === 'day' && rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
+                match = true;
+            } else if (currentPeriod === 'month' && rowYear === lastYear && rowMonth === lastMonth) {
+                match = true;
+            } else if (currentPeriod === 'year' && rowYear === lastYear) {
+                match = true;
+            }
+
+            if (match && !isNaN(techLossValue)) {
+                if (companyType === "Ўзбекнефтгаз") {
+                    uzbekneftgazSum += techLossValue;
+                } else if (companyType === "Хорижий ва ҚК") {
+                    otherSum += techLossValue;
+                }
+            }
+        }
+
+        const format = currentPeriod === 'day' ? (v) => v.toFixed(0) : (v) => v.toFixed(0);
+
+        document.getElementById('uzbekneftgazsum').innerText = format(uzbekneftgazSum);
+        document.getElementById('other-sum').innerText = format(otherSum);
+        document.querySelector('.donut .center').innerText = format(uzbekneftgazSum + otherSum);
+    }
+
+    function renderTechLossTable() {
+        if (selectedCategory !== 'Технологик юкотиш') return;
+        if (!lastFilledDate) return;
+
+        const lastDay = lastFilledDate.getDate();
+        const lastMonth = lastFilledDate.getMonth();
+        const lastYear = lastFilledDate.getFullYear();
+
+        const companyData = {};
+
+        for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            if (!row || !row[0]) continue;
+
+            const date = new Date((row[0] - 25569) * 86400 * 1000);
+            if (isNaN(date)) continue;
+
+            let match = false;
+            if (currentPeriod === 'day') {
+                match = date.getFullYear() === lastYear &&
+                    date.getMonth() === lastMonth &&
+                    date.getDate() === lastDay;
+            } else if (currentPeriod === 'month') {
+                match = date.getFullYear() === lastYear &&
+                    date.getMonth() === lastMonth;
+            } else if (currentPeriod === 'year') {
+                match = date.getFullYear() === lastYear;
+            }
+
+            if (match) {
+                const companyName = row[1]; // колонка B
+                const techLossValue = parseFloat(row[20]) || 0; // колонка U (индекс 20)
+
+                if (companyName) {
+                    if (!companyData[companyName]) {
+                        companyData[companyName] = 0;
+                    }
+                    companyData[companyName] += techLossValue;
+                }
+            }
+        }
+
+        // Обновляем заголовок таблицы
+        const tableHead = document.querySelector(".factory-table thead");
+        tableHead.innerHTML = `
+            <tr>
+                <th>Корхона номи</th>
+                <th>Технологик юкотиш</th>
+            </tr>
+        `;
+
+        // Заполняем тело таблицы
+        const tbody = document.getElementById("company-table-body");
+        tbody.innerHTML = "";
+
+        for (const [company, value] of Object.entries(companyData)) {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${company}</td>
+                    <td>${value.toFixed(2)}</td>
+                </tr>
+            `;
+        }
+
+        console.log("Таблица обновлена: Технологик юкотиш (" + currentPeriod + ")");
+    }
+
+    // Обработчик нажатия кнопки "Технологик юкотиш"
+    document.getElementById('tech-missed').addEventListener('click', () => {
+        selectedCategory = 'Технологик юкотиш';
+        startTechLossDonut();
+        renderTechLossTable();
+    });
 
 
+    function endDonut() {
+        if (selectedCategory !== 'Кун охирида колдик') return;
+        console.log("Selected Category: " + selectedCategory);
+        let uzbekneftgazSum = 0;
+        let otherSum = 0;
+
+        if (!lastFilledDate) {
+            document.getElementById('uzbekneftgazsum').innerText = '0';
+            document.getElementById('other-sum').innerText = '0';
+            document.querySelector('.donut .center').innerText = '0';
+            return;
+        }
+
+        const lastDay = lastFilledDate.getDate();
+        const lastMonth = lastFilledDate.getMonth();
+        const lastYear = lastFilledDate.getFullYear();
+
+        for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            if (!row || row.length < 19 || !row[0] || !row[2]) continue;
+
+            const excelDate = row[0];
+            const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
+            if (isNaN(dateCell)) continue;
+
+            const companyType = row[2].trim(); // колонка C
+            const endOfDayValue = parseFloat(row[19]) || 0; // колонка T (индекс 19)
+
+            const rowDay = dateCell.getDate();
+            const rowMonth = dateCell.getMonth();
+            const rowYear = dateCell.getFullYear();
+
+            let match = false;
+            if (currentPeriod === 'day' && rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
+                match = true;
+            } else if (currentPeriod === 'month' && rowYear === lastYear && rowMonth === lastMonth) {
+                match = true;
+            } else if (currentPeriod === 'year' && rowYear === lastYear) {
+                match = true;
+            }
+
+            if (match && !isNaN(endOfDayValue)) {
+                if (companyType === "Ўзбекнефтгаз") {
+                    uzbekneftgazSum += endOfDayValue;
+                } else if (companyType === "Хорижий ва ҚК") {
+                    otherSum += endOfDayValue;
+                }
+            }
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000) {
+                if (num % 1000 === 0) {
+                    return (num / 1000) + ' т.';
+                } else {
+                    return (num / 1000).toFixed(1) + ' т.';
+                }
+            } else {
+                return num.toFixed(0);
+            }
+        }
+
+        document.getElementById('uzbekneftgazsum').innerText = formatNumber(uzbekneftgazSum);
+        document.getElementById('other-sum').innerText = formatNumber(otherSum);
+        document.querySelector('.donut .center').innerText = formatNumber(uzbekneftgazSum + otherSum);
+    }
 
 
     if (lastFilledDate) {
@@ -392,7 +839,12 @@ function al() {
         console.log("Экспорт:", eksportSum);
     }
 
-
+    if (selectedCategory == "Кун бошида колдик" || selectedCategory == "Кун охирида колдик") {
+        const el = document.getElementById('uzbekneftgazsum');
+        el.style.fontSize = '18px';
+        const el1 = document.getElementById('other-sum');
+        el1.style.fontSize = '18px';
+    }
 
     function updateSumsByPeriod(period) {
         if (!lastFilledDate || json.length === 0) return;
@@ -460,18 +912,63 @@ function al() {
     document.getElementById("last-day-btn").addEventListener("click", function () {
         updateFactoryTableByPeriod("day");
         updateSumsByPeriod("day"); // 👈 добавлено
+        currentPeriod = 'day';
+        startDonut();
+        endDonut();
+        renderEndOfDayTable();
+        renderStartOfDayTable();
+        startTechLossDonut();
+        renderTechLossTable();
+        if (selectedCategory == "Кун бошида колдик" || selectedCategory == "Кун охирида колдик") {
+            const el = document.getElementById('uzbekneftgazsum');
+            el.style.fontSize = '18px';
+            const el1 = document.getElementById('other-sum');
+            el1.style.fontSize = '18px';
+        }
     });
 
     document.getElementById("last-month-btn").addEventListener("click", function () {
         updateFactoryTableByPeriod("month");
         updateSumsByPeriod("month"); // 👈 добавлено
+        currentPeriod = 'month';
+        startDonut();
+        endDonut();
+        renderEndOfDayTable();
+        renderStartOfDayTable();
+        startTechLossDonut();
+        renderTechLossTable();
+        if (selectedCategory == "Кун бошида колдик" || selectedCategory == "Кун охирида колдик") {
+            const el = document.getElementById('uzbekneftgazsum');
+            el.style.fontSize = '18px';
+            const el1 = document.getElementById('other-sum');
+            el1.style.fontSize = '18px';
+        }
     });
 
     document.getElementById("last-year-btn").addEventListener("click", function () {
         updateFactoryTableByPeriod("year");
         updateSumsByPeriod("year"); // 👈 добавлено
-    });
+        currentPeriod = 'year';
+        startDonut();
+        endDonut();
+        renderEndOfDayTable();
+        renderStartOfDayTable();
+        startTechLossDonut();
+        renderTechLossTable();
 
+        if (selectedCategory == "Кун бошида колдик" || selectedCategory == "Кун охирида колдик") {
+            const el = document.getElementById('uzbekneftgazsum');
+            el.style.fontSize = '18px';
+            const el1 = document.getElementById('other-sum');
+            el1.style.fontSize = '18px';
+        }
+    });
+    if (selectedCategory !== "Кун бошида колдик" || selectedCategory !== "Кун охирида колдик") {
+        const el = document.getElementById('uzbekneftgazsum');
+        el.style.fontSize = '24px';
+        const el1 = document.getElementById('other-sum');
+        el1.style.fontSize = '24px';
+    }
 
     let uzbekneftgazSum = 0;
     let otherSum = 0;
@@ -638,7 +1135,7 @@ function al() {
     function formatMidValue(value) {
         const num = parseFloat(value);
         const formatted = isNaN(num) ? "0.00" : num.toFixed(2);
-    
+
         if (num > 0) {
             return `<span style="color:green">${formatted} ▲</span>`;
         } else if (num < 0) {
@@ -647,7 +1144,7 @@ function al() {
             return `<span style="color:white">${formatted}</span>`;
         }
     }
-    
+
 
 
 
@@ -676,8 +1173,8 @@ function al() {
         const formatNumber = value => {
             const num = parseFloat(value);
             return (!isNaN(num) ? num.toFixed(2) : (value ?? ""));
-        };        
-        
+        };
+
         companies.forEach(company => {
             for (let i = 1; i < json.length; i++) {
                 const row = json[i];
@@ -688,7 +1185,7 @@ function al() {
                     const colQ = formatMidValue(row[16]);
                     const colR = formatMidValue(row[24]);
                     const companyType = row[2] || "";
-        
+
                     tableRows += `
                     <tr data-company-type="${companyType}">
                         <td>${company}</td>
@@ -703,8 +1200,8 @@ function al() {
                 }
             }
         });
-        
-        
+
+
 
         document.getElementById("company-table-body").innerHTML = tableRows;
 
@@ -1058,7 +1555,7 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
 
 // 📈 Отрисовка графика
 function drawChart({ map2024, map2025, lastFilledDate }) {
-    const chartData = [['Дата', 'Фон', '2024', { type: 'string', role: 'annotation' }, '2025', { type: 'string', role: 'annotation' }]];
+    const chartData = [['Дата', ' ', '2024', { type: 'string', role: 'annotation' }, '2025', { type: 'string', role: 'annotation' }]];
     const dateList = [];
 
     for (let m = 1; m <= 12; m++) {
@@ -1133,7 +1630,10 @@ function drawChart({ map2024, map2025, lastFilledDate }) {
             textStyle: { color: '#ffffff' },
             gridlines: {
                 count: -1,
-                color: '#4d4d4d' // тёмно-серая сетка
+                color: '#4d4d4d'  // Твоя серая сетка
+            },
+            minorGridlines: {
+                color: 'transparent'  // Убрать белые второстепенные линии
             },
             ticks: ticks,
             format: formatPattern
@@ -1141,9 +1641,12 @@ function drawChart({ map2024, map2025, lastFilledDate }) {
         vAxis: {
             textPosition: 'none',
             gridlines: {
-                color: '#4d4d4d' // тёмно-серая сетка
+                color: '#4d4d4d'  // Твоя серая сетка
+            },
+            minorGridlines: {
+                color: 'transparent'  // Убрать белые второстепенные линии
             }
-        },
+        },        
         annotations: {
             alwaysOutside: true,
             textStyle: {
@@ -1222,6 +1725,8 @@ document.getElementById('last-day-btn').addEventListener('click', () => {
 
     const { map2024, map2025 } = filterData(company, category, null, startDate, endDate);
     drawChart({ map2024, map2025 });
+
+    currentPeriod = 'day';
 });
 
 document.getElementById('last-month-btn').addEventListener('click', () => {
@@ -1238,6 +1743,7 @@ document.getElementById('last-month-btn').addEventListener('click', () => {
 
     const { map2024, map2025 } = filterData(company, category, null, startDate, endDate);
     drawChart({ map2024, map2025 });
+    currentPeriod = 'month';
 });
 
 document.getElementById('last-year-btn').addEventListener('click', () => {
@@ -1254,6 +1760,7 @@ document.getElementById('last-year-btn').addEventListener('click', () => {
 
     const { map2024, map2025 } = filterData(company, category, null, startDate, endDate);
     drawChart({ map2024, map2025 });
+    currentPeriod = 'year';
 });
 
 const { map2024, map2025 } = filterData(company, category, selectedDate);
@@ -1350,14 +1857,17 @@ function updateFactoryTableByPeriod(period) {
 
 document.getElementById('last-day-btn').addEventListener('click', () => {
     updateFactoryTableByPeriod('day');
+    currentPeriod = 'day';
 });
 
 document.getElementById('last-month-btn').addEventListener('click', () => {
     updateFactoryTableByPeriod('month');
+    currentPeriod = 'month';
 });
 
 document.getElementById('last-year-btn').addEventListener('click', () => {
     updateFactoryTableByPeriod('year');
+    currentCategory = 'year';
 });
 
 
@@ -1405,14 +1915,18 @@ function updateDonutValues(filterType) {
 // Привязка кнопок только к пончику
 document.getElementById('last-day-btn').addEventListener('click', () => {
     updateDonutValues('day');
+    currentPeriod = 'day';
 });
 
 document.getElementById('last-month-btn').addEventListener('click', () => {
     updateDonutValues('month');
+    currentPeriod = 'month';
 });
 
 document.getElementById('last-year-btn').addEventListener('click', () => {
     updateDonutValues('year');
+    currentPeriod = 'year';
+
 });
 
 // Инициализация при загрузке страницы

@@ -688,10 +688,11 @@ select {
   border: 0;
   color: white;
   text-align: center;
+  margin-top: 20px;
   background: none;
-  padding-top: 20px;
+  font-size: 12px;
+  z-index: 45;
 }
-
 .dobichabtn:hover {
   background: none;
   color: skyblue;
@@ -784,4 +785,22 @@ select {
   background-color: #004080;
   color: white;
   pointer-events: none;
+}
+
+.donut {
+  position: relative; /* чтобы позиционировать внутри */
+}
+
+#uzbekneftgazsum, #other-sum {
+  position: absolute;
+  font-weight: bold;
+  color: white;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  max-width: 50%; /* ограничиваем ширину для текста */
+  text-align: center;
+  transition: font-size 0.2s ease;
+  
+  font-size: 20px;
 }
