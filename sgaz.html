@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>СУГ</title>
-  <link rel="stylesheet" href="style1.css">
+  <title>ОЛТИНГУГУРТ</title>
+  <link rel="stylesheet" href="style.css">
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- В HEAD -->
@@ -18,7 +18,7 @@
   <div class="dashboard">
     <div class="top-bar">
       <img src="Снимок экрана 2025-04-18 174333.png" alt="logo" class="logo">
-      <p class="tit">СУЮЛТИРИЛГАН ГАЗ ИШЛАБ ЧИКАРИШ ВА ИСТЕЬМОЛЧИЛАРГА ЕТКАЗИБ БЕРИШ КУРСАТКИЧЛАР</p>
+      <p class="tit">ОЛТИНГУГУРТ ИШЛАБ ЧИКАРИШ ВА ИСТЕЬМОЛЧИЛАРГА ЕТКАЗИБ БЕРИШ КУРСАТКИЧЛАР</p>
       <div class="calendar-container" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
         <input type="text" id="date-picker" placeholder="Выберите дату" style="
             padding: 6px 10px;
@@ -40,6 +40,7 @@
           <a href="index.html" class="toggle-btn sera">СЕРА</a>
           <a href="sgaz.html" class="toggle-btn sug active">СУГ</a>
         </div>
+
 
         <div class="checkcon">
           <button class="checkbox" id="summary"></button>
@@ -71,14 +72,14 @@
         <div class="icon-block">
           <img src="Рисунок1.png" alt="logo" class="icon">
           <div class="left-box">
-            <p>Кун бошида колдик</p>
+            <button id="start-of-day-btn" class="dobichabtn" data-category="Кун бошида колдик">Кун бошида колдик</button>
             <p id="s-column-sum">0</p>
           </div>
         </div>
         <div class="icon-block">
           <img src="Рисунок2.png" alt="" class="icon">
           <div class="left-box">
-            <button class="category-btn dobichabtn" data-category="Ишлаб чиқариш">Ишлаб чикариш</button>
+            <button class="category-btn dobichabtn" data-category="Ишлаб чиқариш">Ишлаб чиқариш</button>
             <p id="sum-text">0</p>
           </div>
         </div>
@@ -99,14 +100,14 @@
         <div class="icon-block">
           <img src="Рисунок4.png" alt="" class="icon">
           <div class="left-box">
-            <p>Технологик юкотиш</p>
+            <button class="dobichabtn" id="tech-missed" data-category="Технологик юкотиш">Технологик юкотиш</button>
             <p id="s-column-sum2">0</p>
           </div>
         </div>
         <div class="icon-block">
           <img src="Рисунок5.png" alt="" class="icon">
           <div class="left-box">
-            <p>Кун охирида колдик</p>
+            <button class="dobichabtn" id="end-of-day-btn" data-category="Кун охирида колдик">Кун охирида колдик</button>
             <p id="s-column-sum1">0</p>
           </div>
         </div>
@@ -159,7 +160,7 @@
         </table>
       </div>
 
-      <div class="card dropdown" style="">
+      <div class="card dropdown">
         <div class="tablebox" id="last-year-btn" style="cursor: pointer;">
           Йил бошидан
         </div>
@@ -208,7 +209,7 @@
 
 
       <div class="circle-chart">
-        <h3>Суюлтирилган газ ишлаб чикариш улуши</h3>
+        <h3 id="donut-title">Ишлаб чикариш</h3>
         <div class="donut">
           <div class="hole"></div>
           <p class="left" contenteditable="false" id="uzbekneftgazsum">0</p>
@@ -241,7 +242,9 @@
     </div>
 
     <script src="script1.js"></script>
+    <!-- <script src="editScript.js"></script> -->
     <script src="chartScript1.js"></script>
+    <script src="xlsx.full.min.js"></script>
 </body>
 
 </html>

@@ -145,35 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return { sumForUzbekneftgaz, sumForOthers };
     }
-
-    // Функция для обновления данных на странице
-    function updateDisplayData(filterType) {
-        const { sumForUzbekneftgaz, sumForOthers } = calculateSums(filterType);
-
-        // Обновляем summary
-        document.getElementById('uzbekneftgaz-summary').innerText = `${Math.floor(sumForUzbekneftgaz)}`;
-        document.getElementById('other-summary').innerText = `${Math.floor(sumForOthers)}`;
-
-        // Обновляем пончик (left и right)
-        document.getElementById('uzbekneftgazsum').innerText = `${Math.floor(sumForUzbekneftgaz)}`;
-        document.getElementById('other-sum').innerText = `${Math.floor(sumForOthers)}`;
-    }
-
-    // Кнопки периодов — обновляют и summary, и пончик
-    document.getElementById('last-day-btn').addEventListener('click', () => {
-        updateDisplayData('day');
-    });
-
-    document.getElementById('last-month-btn').addEventListener('click', () => {
-        updateDisplayData('month');
-    });
-
-    document.getElementById('last-year-btn').addEventListener('click', () => {
-        updateDisplayData('year');
-    });
-
-    // Изначально показываем данные за последний день
-    updateDisplayData('day');
 });
 
 document.getElementById('last-day-btn').addEventListener('click', () => {
@@ -186,11 +157,4 @@ document.getElementById('last-month-btn').addEventListener('click', () => {
 
 document.getElementById('last-year-btn').addEventListener('click', () => {
     updateFactoryTableByPeriod('year');
-});
-
-window.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('date-picker');
-    const today = new Date();
-    const formatted = today.toLocaleDateString('ru-RU'); // формат: дд.мм.гггг
-    input.value = formatted;
 });

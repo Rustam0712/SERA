@@ -1389,28 +1389,37 @@ function al() {
 
     document.querySelectorAll('.checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function () {
-            const isActive = this.classList.contains('active');
-
-            if (isActive) {
-                // Сброс фильтра
-                this.classList.remove('active');
-                document.querySelectorAll('.checkbox').forEach(btn => btn.classList.remove('disabled'));
-                resetCompanyFilter(); // показать все строки снова
-            } else {
-                // Активируем только выбранную кнопку
-                document.querySelectorAll('.checkbox').forEach(btn => {
-                    btn.classList.remove('active');
-                    btn.classList.add('disabled');
-                });
+            const wasActive = this.classList.contains('active');
+            const filterType = this.id;
+    
+            // Сначала всегда сбрасываем таблицу
+            resetCompanyFilter();
+    
+            // Удаляем классы у всех чекбоксов
+            document.querySelectorAll('.checkbox').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('disabled');
+            });
+    
+            if (!wasActive) {
+                // Активируем текущий
                 this.classList.add('active');
-                this.classList.remove('disabled');
-
-                // Определяем фильтр
-                const filterType = this.id;
-                applyCompanyFilter(filterType); // фильтруем таблицу
+    
+                // После сброса таблицы — применяем фильтрацию
+                applyCompanyFilter(filterType);
             }
         });
     });
+    
+    
+    // Функция sleep
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    
+    
+    
 
 
 
