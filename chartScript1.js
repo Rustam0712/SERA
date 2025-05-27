@@ -8,6 +8,7 @@ document.querySelectorAll('.dobichabtn').forEach(button => {
         selectedCategory = button.getAttribute('data-category');
         console.log("Нажата категория:", selectedCategory); // <--- добавь это для проверки
         updateSummaries(); // вызывает нужную функцию
+        updateCategorySums();
     });
 });
 
@@ -15,18 +16,21 @@ document.querySelectorAll('.dobichabtn').forEach(button => {
 document.getElementById('last-day-btn').addEventListener('click', () => {
     selectedPeriod = 'day';
     updateSummaries();
+    updateCategorySums();
     updateDonutChart('day');
 });
 
 document.getElementById('last-month-btn').addEventListener('click', () => {
     selectedPeriod = 'month';
     updateSummaries();
+    updateCategorySums();
     updateDonutChart('month');
 });
 
 document.getElementById('last-year-btn').addEventListener('click', () => {
     selectedPeriod = 'year';
     updateSummaries();
+    updateCategorySums();
     updateDonutChart('year');
 });
 
@@ -296,7 +300,71 @@ function restoreFactoryTableHeader() {
 
 
 
+function updateCategorySums() {
+    const ids = [
+        's-column-sum', 's-column-sum1', 's-column-sum2',
+        'sum-text', 'sum-text1', 'sum-text2'
+    ];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = '0';
+    });
 
+    let sumStart = 0, sumEnd = 0, sumLoss = 0;
+    let sumIshlab = 0, sumBirja = 0, sumExport = 0;
+
+    const lastDay = lastFilledDate.getDate();
+    const lastMonth = lastFilledDate.getMonth();
+    const lastYear = lastFilledDate.getFullYear();
+
+    for (let i = 1; i < json.length; i++) {
+        const row = json[i];
+        if (!row || row.length < 21 || !row[0]) continue;
+
+        const category = (row[3] || '').trim();
+        const company = (row[2] || '').trim();
+        const excelDate = row[0];
+        const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
+        if (isNaN(dateCell)) continue;
+
+        const rowYear = dateCell.getFullYear();
+        const rowMonth = dateCell.getMonth();
+        const rowDay = dateCell.getDate();
+
+        if (!(rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay)) continue;
+
+        if (selectedCompanyType !== "all" && company !== selectedCompanyType) continue;
+
+        // Остатки
+        if (category === 'Кун бошида колдик') {
+            sumStart += parseFloat(row[18]) || 0;
+        }
+        if (category === 'Кун охирида колдик') {
+            sumEnd += parseFloat(row[19]) || 0;
+        }
+        if (category === 'Технологик юкотиш') {
+            sumLoss += parseFloat(row[20]) || 0;
+        }
+
+        // Производство, экспорт, биржа — колонка H (index 7)
+        const actual = parseFloat(row[7]) || 0;
+        if (category === 'Ишлаб чиқариш') {
+            sumIshlab += actual;
+        } else if (category === 'Биржага юклаш') {
+            sumBirja += actual;
+        } else if (category === 'Экспорт') {
+            sumExport += actual;
+        }
+    }
+
+    document.getElementById('s-column-sum').innerText = sumStart.toFixed(2);
+    document.getElementById('s-column-sum1').innerText = sumEnd.toFixed(2);
+    document.getElementById('s-column-sum2').innerText = sumLoss.toFixed(2);
+
+    document.getElementById('sum-text').innerText = sumIshlab.toFixed(2);
+    document.getElementById('sum-text1').innerText = sumBirja.toFixed(2);
+    document.getElementById('sum-text2').innerText = sumExport.toFixed(2);
+}
 
 function updateSummaries() {
     // ⛔ Прерываем обновление, если выбрана одна из специальных категорий
@@ -329,39 +397,41 @@ function updateSummaries() {
     for (let i = 1; i < json.length; i++) {
         const row = json[i];
         if (!row || row.length < 9 || !row[0]) continue;
-
+    
         if ((row[3] || '').trim() !== selectedCategory) continue;
-
+        if (selectedCompanyType !== "all" && (row[2] || '').trim() !== selectedCompanyType) continue;
+    
         const excelDate = row[0];
         const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
         if (isNaN(dateCell)) continue;
-
+    
         const plan = parseFloat(row[6]) || 0;
         const actual = parseFloat(row[7]) || 0;
         const mid = parseFloat(row[8]) || 0;
-
+    
         const rowYear = dateCell.getFullYear();
         const rowMonth = dateCell.getMonth();
         const rowDay = dateCell.getDate();
-
+    
         if (rowYear === lastYear) {
             yearPlan += plan;
             yearActual += actual;
             yearMid += mid;
         }
-
+    
         if (rowYear === lastYear && rowMonth === lastMonth) {
             monthPlan += plan;
             monthActual += actual;
             monthMid += mid;
         }
-
+    
         if (rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
             dayPlan += plan;
             dayActual += actual;
             dayMid += mid;
         }
     }
+    
 
     setPlainValue('day-plan', dayPlan);
     setPlainValue('day-actual', dayActual);
@@ -429,6 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             drawChart(filterData("Общий", null, null));
             updateSummaries();
+            updateCategorySums();
             al();
         })
         .catch(error => {
@@ -1386,30 +1457,39 @@ function al() {
         generateFactoryTable(); // перерисовываем всё заново
     }
 
+    
 
     document.querySelectorAll('.checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function () {
             const wasActive = this.classList.contains('active');
             const filterType = this.id;
     
-            // Сначала всегда сбрасываем таблицу
             resetCompanyFilter();
     
-            // Удаляем классы у всех чекбоксов
             document.querySelectorAll('.checkbox').forEach(btn => {
                 btn.classList.remove('active');
                 btn.classList.remove('disabled');
             });
     
             if (!wasActive) {
-                // Активируем текущий
                 this.classList.add('active');
     
-                // После сброса таблицы — применяем фильтрацию
+                // Присваиваем тип компании для фильтрации
+                selectedCompanyType = (filterType === "summary")
+                    ? "all"
+                    : (filterType === "neft" ? "Ўзбекнефтгаз" : "Хорижий ва ҚК");
+    
                 applyCompanyFilter(filterType);
+            } else {
+                selectedCompanyType = "all";
             }
+    
+            // ⬅️ Обязательно обновляем расчёты
+            updateSummaries();
+            updateCategorySums();
         });
     });
+    
     
     
     // Функция sleep
@@ -1476,7 +1556,7 @@ function al() {
     }
 }
 
-
+let selectedCompanyType = "all"; // "Ўзбекнефтгаз", "Хорижий ва ҚК", либо "all"
 // ✅ Фильтрация при выборе категории и компании
 document.querySelectorAll('.category-btn').forEach(button => {
     button.addEventListener('click', () => {
