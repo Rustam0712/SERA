@@ -45,12 +45,12 @@
 
   .left-panel {
     grid-area: left;
-    background-color: #142437;
     padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 15px;
     /* padding-right: 105px; */
+    z-index: 50;
   }
 
   .checkbox-group {
@@ -60,6 +60,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px; /* Отступ между строками */
+    margin-top: 70%;
+    width: 300px;
   }
   
   .checkcon {
@@ -168,23 +170,26 @@
 
   .icon-section {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    gap: 50px;
+    z-index: 20;
+    position: absolute;
   }
 
   .icon-block {
-    background: #1b2e42;
+    background: black;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px;
+    padding: 20px;
     border: 2px solid #2c3e50;
-    height: 60px;
+    height: 125px;
+    width: 270px;
   }
 
   .icon {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     /* background-color: #3a7fc2; */
     border-radius: 6px;
   }
@@ -216,15 +221,28 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    z-index: 50;
+  }
+  .container-main {
+    position: absolute;
+    left: 0.5%;
+    top: 37%;
+    width: 15.9%;
+    height: 100vh;
+    z-index: 90;
+    display: flex;
+    gap: 3%;
+    flex-direction: column;
   }
 
   .tablebox {
       font-family: 'Impact', sans-serif;
-      font-size: 16px;
+      font-size: 20px;
       width: 100%;
       text-align: center;
-
+      padding: 10px;
       background-color: #333;
+      letter-spacing: 1px;
       /* padding: 10px;  */
   }
 
@@ -279,8 +297,8 @@
     background: #1b2e42;
     border: 2px solid #2c3e50;
 
-    height: 112.5%;
-    margin-top: -27%;
+    height: 850px;
+    margin-top: 150px;
   }
 
 
@@ -339,6 +357,8 @@
     border: 2px solid #2c3e50;
     padding: 10px;
     position: relative;
+
+    display: none;
   }
 
   .fake-line {
@@ -455,7 +475,7 @@ button.newinfo:hover {
   
   .production-table th, .production-table td {
     border: 1px solid #444;
-    padding: 10px;
+    padding: 15px;
     text-align: center;
     font-size: 16px;
     font-weight: bold;
@@ -526,10 +546,11 @@ button.newinfo:hover {
 
     
     position: absolute;
-    margin-top: 120px;
-    width: 1246px;
+    margin-top: 150px;
+    width: 1146px;
     height: 430px;
     z-index: 10;
+    margin-left: 90px;
 }
 
 .factory-table th,
@@ -572,8 +593,8 @@ button:hover {
 
 .circle-chart h3 {
   position: absolute;
-  top: 5%;
-  z-index: 1;
+  top: 19%;
+  z-index: 20;
   border-bottom: 2px solid white;
   width: 400px;
   height: 50px;
@@ -588,7 +609,7 @@ button:hover {
 .imagelogos {
   width: 370px;
   position: absolute;
-  margin-top: 750px;
+  margin-top: 550px;
 }
 
 .faded {
@@ -659,7 +680,7 @@ select {
   padding: 20px;
   border-radius: 12px;
   /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.4); */
-  width: 130%;
+  width: 100%;
   height: 100%;
   /* border: 1px solid black; */
 }
@@ -673,9 +694,10 @@ select {
   /* border: 2px solid white;;s */
   position: absolute;
   top: 57%;
-  width: 1210px;
-  left: 13.3%;
+  width: 1415px;
+  left: 6.8%;
   height: 470px;
+  /* background-color: black; */
 }
 
 .controls {
@@ -690,6 +712,7 @@ select {
   text-align: center;
   background: none;
   padding-top: 20px;
+  font-size: 14px;
 }
 
 .dobichabtn:hover {
@@ -719,27 +742,27 @@ select {
 }
 
 #sum-text {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 #s-column-sum {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 #sum-text1 {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 #sum-text2 {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 #s-column-sum1 {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 #s-column-sum2 {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 #cclear {
@@ -768,7 +791,7 @@ select {
 }
 
 .toggle-btn {
-  padding: 6px 30px;
+  padding: 6px 53px;
   text-decoration: none;
   color: #004080;
   /* background-color: black; */

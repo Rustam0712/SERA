@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ОЛТИНГУГУРТ</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style1.css">
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- В HEAD -->
@@ -18,7 +18,7 @@
   <div class="dashboard">
     <div class="top-bar">
       <img src="Снимок экрана 2025-04-18 174333.png" alt="logo" class="logo">
-      <p class="tit">ОЛТИНГУГУРТ ИШЛАБ ЧИКАРИШ ВА ИСТЕЬМОЛЧИЛАРГА ЕТКАЗИБ БЕРИШ КУРСАТКИЧЛАР</p>
+      <p class="tit">СУЮЛТИРИЛГАН ГАЗ ИШЛАБ ЧИКАРИШ ВА ИСТЕЬМОЛЧИЛАРГА ЕТКАЗИБ БЕРИШ КУРСАТКИЧЛАР</p>
       <div class="calendar-container" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
         <input type="text" id="date-picker" placeholder="Выберите дату" style="
             padding: 6px 10px;
@@ -59,7 +59,7 @@
       </div>
 
       <div class="icon-section">
-        <select id="company-select">
+        <!-- <select id="company-select">
           <option value="Общий">Общий</option>
           <option>SANEG МЧЖ</option>
           <option>Муборак ГҚИЗ</option>
@@ -68,7 +68,7 @@
           <option>Бухоро НҚИЗ МЧЖ</option>
           <option>LUKOIL МЧЖ</option>
           <option>New silk road oil & gas МЧЖ</option>
-        </select>
+        </select> -->
         <div class="icon-block">
           <img src="Рисунок1.png" alt="logo" class="icon">
           <div class="left-box">
@@ -80,7 +80,7 @@
           <img src="Рисунок2.png" alt="" class="icon">
           <div class="left-box">
             <button class="category-btn dobichabtn" data-category="Ишлаб чиқариш">Ишлаб чиқариш</button>
-            <p id="sum-text">0</p>
+            <p id="sum-text">0</p>    
           </div>
         </div>
         <div class="icon-block">
@@ -116,7 +116,8 @@
     </div>
 
     <div class="main-panel">
-      <div class="card dropdown">
+      <div class="container-main">
+        <div class="card dropdown">
         <div class="tablebox" id="last-day-btn" style="cursor: pointer;">
           Кунлик
         </div>
@@ -181,12 +182,12 @@
           </tbody>
         </table>
       </div>
+      </div>
 
 
 
       <br>
 
-      <div class="probel"></div>
 
       <!-- <div class="table-title">Заводлар кесимида ишлаб чиқариш кўрсаткичлари</div> -->
       <table class="factory-table">
