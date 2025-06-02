@@ -357,13 +357,13 @@ function updateCategorySums() {
         }
     }
 
-    document.getElementById('s-column-sum').innerText = sumStart.toFixed(2);
-    document.getElementById('s-column-sum1').innerText = sumEnd.toFixed(2);
-    document.getElementById('s-column-sum2').innerText = sumLoss.toFixed(2);
+    document.getElementById('s-column-sum').innerText = sumStart.toFixed(0);
+    document.getElementById('s-column-sum1').innerText = sumEnd.toFixed(0);
+    document.getElementById('s-column-sum2').innerText = sumLoss.toFixed(0);
 
-    document.getElementById('sum-text').innerText = sumIshlab.toFixed(2);
-    document.getElementById('sum-text1').innerText = sumBirja.toFixed(2);
-    document.getElementById('sum-text2').innerText = sumExport.toFixed(2);
+    document.getElementById('sum-text').innerText = sumIshlab.toFixed(0);
+    document.getElementById('sum-text1').innerText = sumBirja.toFixed(0);
+    document.getElementById('sum-text2').innerText = sumExport.toFixed(0);
 }
 
 
@@ -534,7 +534,7 @@ function al() {
             }
         }
 
-        document.getElementById('s-column-sum').innerText = `${sColumnSum.toFixed(2)}`;
+        document.getElementById('s-column-sum').innerText = `${sColumnSum.toFixed(0)}`;
         console.log(sColumnSum.toFixed(2));
     }
 
@@ -973,13 +973,13 @@ function al() {
         }
 
         // Обновление значений в DOM
-        document.getElementById('s-column-sum').innerText = sum18.toFixed(2);
-        document.getElementById('s-column-sum1').innerText = sum19.toFixed(2);
-        document.getElementById('s-column-sum2').innerText = sum20.toFixed(2);
+        document.getElementById('s-column-sum').innerText = sum18.toFixed(0);
+        document.getElementById('s-column-sum1').innerText = sum19.toFixed(0);
+        document.getElementById('s-column-sum2').innerText = sum20.toFixed(0);
 
-        document.getElementById('sum-text').innerText = ishlabChiqarishSum.toFixed(2);
-        document.getElementById('sum-text1').innerText = birjagaYuklashSum.toFixed(2);
-        document.getElementById('sum-text2').innerText = eksportSum.toFixed(2);
+        document.getElementById('sum-text').innerText = ishlabChiqarishSum.toFixed(0);
+        document.getElementById('sum-text1').innerText = birjagaYuklashSum.toFixed(0);
+        document.getElementById('sum-text2').innerText = eksportSum.toFixed(0);
     }
 
     document.getElementById("last-day-btn").addEventListener("click", function () {
@@ -1323,10 +1323,10 @@ function al() {
             }
         }
 
-        document.getElementById('sum-text').innerText = ishlabChiqarishSum.toFixed(2);
-        document.getElementById('sum-text1').innerText = birjagaYuklashSum.toFixed(2);
-        document.getElementById('sum-text2').innerText = eksportSum.toFixed(2);
-        document.getElementById('s-column-sum').innerText = sColumnSum.toFixed(2);
+        document.getElementById('sum-text').innerText = ishlabChiqarishSum.toFixed(0);
+        document.getElementById('sum-text1').innerText = birjagaYuklashSum.toFixed(0);
+        document.getElementById('sum-text2').innerText = eksportSum.toFixed(0);
+        document.getElementById('s-column-sum').innerText = sColumnSum.toFixed(0);
 
     });
 
@@ -1462,34 +1462,34 @@ function al() {
 
     document.querySelectorAll('.checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function () {
-            const wasActive = this.classList.contains('active');
-            const filterType = this.id;
+            const isActive = this.classList.contains('active');
     
-            resetCompanyFilter();
+            // Если уже активен — не даём отключить (чтобы всегда один был выбран)
+            if (isActive) return;
     
+            // Удаляем активность у всех
             document.querySelectorAll('.checkbox').forEach(btn => {
                 btn.classList.remove('active');
                 btn.classList.remove('disabled');
             });
     
-            if (!wasActive) {
-                this.classList.add('active');
+            // Делаем текущий активным
+            this.classList.add('active');
     
-                // Присваиваем тип компании для фильтрации
-                selectedCompanyType = (filterType === "summary")
-                    ? "all"
-                    : (filterType === "neft" ? "Ўзбекнефтгаз" : "Хорижий ва ҚК");
+            // Определяем фильтр
+            const filterType = this.id;
+            selectedCompanyType = (filterType === "summary")
+                ? "all"
+                : (filterType === "neft" ? "Ўзбекнефтгаз" : "Хорижий ва ҚК");
     
-                applyCompanyFilter(filterType);
-            } else {
-                selectedCompanyType = "all";
-            }
-    
-            // ⬅️ Обязательно обновляем расчёты
+            // Обновляем фильтры и расчёты
+            resetCompanyFilter();
+            applyCompanyFilter(filterType);
             updateSummaries();
             updateCategorySums();
         });
     });
+    
     
     
     
