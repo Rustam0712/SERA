@@ -9,6 +9,8 @@ document.querySelectorAll('.dobichabtn').forEach(button => {
         console.log("Нажата категория:", selectedCategory); // <--- добавь это для проверки
         updateSummaries(); // вызывает нужную функцию
         updateCategorySums();
+        updateFormattedValues();
+
     });
 });
 
@@ -18,6 +20,8 @@ document.getElementById('last-day-btn').addEventListener('click', () => {
     updateSummaries();
     updateCategorySums();
     updateDonutChart('day');
+    updateFormattedValues();
+
 });
 
 document.getElementById('last-month-btn').addEventListener('click', () => {
@@ -25,6 +29,8 @@ document.getElementById('last-month-btn').addEventListener('click', () => {
     updateSummaries();
     updateCategorySums();
     updateDonutChart('month');
+    updateFormattedValues();
+
 });
 
 document.getElementById('last-year-btn').addEventListener('click', () => {
@@ -32,6 +38,8 @@ document.getElementById('last-year-btn').addEventListener('click', () => {
     updateSummaries();
     updateCategorySums();
     updateDonutChart('year');
+    updateFormattedValues();
+
 });
 
 let currentCategory = "Ишлаб чиқариш"; // По умолчанию
@@ -120,13 +128,18 @@ document.querySelectorAll(".dobichabtn").forEach(button => {
 document.getElementById("last-day-btn")?.addEventListener("click", () => {
     currentPeriod = "day";
     updateDonutChart();
+    updateFormattedValues();
+
 });
 document.getElementById("last-month-btn")?.addEventListener("click", () => {
     currentPeriod = "month";
     updateDonutChart();
+    updateFormattedValues();
+
 });
 document.getElementById("last-year-btn")?.addEventListener("click", () => {
     currentPeriod = "year";
+    updateFormattedValues();
     updateDonutChart();
 });
 document.querySelectorAll(".dobichabtn").forEach(button => {
@@ -144,8 +157,40 @@ document.querySelectorAll(".dobichabtn").forEach(button => {
 
         const newTitle = titleMap[currentCategory] || "Олтингугурт улуши";
         document.getElementById("donut-title").innerText = newTitle;
+        updateFormattedValues();
+
     });
 });
+
+function updateFormattedValues() {
+    function formatNumberWithSpaces(num) {
+        const parts = num.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        return parts.join(".");
+    }
+
+    const ids = [
+        's-column-sum',
+        'sum-text',
+        'sum-text1',
+        's-column-sum1',
+        'sum-text2',
+        's-column-sum2'
+    ];
+
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const raw = el.innerText.replace(/\s/g, '').replace(',', '.'); // убираем пробелы и заменяем запятую на точку
+            const num = parseFloat(raw);
+            if (!isNaN(num)) {
+                el.innerText = formatNumberWithSpaces(num.toFixed(2));
+            }
+        }
+    });
+}
+
+
 
 function renderEndOfDayTable() {
     if (selectedCategory !== 'Кун охирида колдик') return;
@@ -210,7 +255,7 @@ function renderEndOfDayTable() {
             </tr>
         `;
     }
-
+    updateFormattedValues();
     console.log("Таблица обновлена: Кун охирида колдик (" + currentPeriod + ")");
 }
 
@@ -280,7 +325,7 @@ function renderStartOfDayTable() {
             </tr>
         `;
     }
-
+    updateFormattedValues();
     console.log("Таблица обновлена: Кун бошида колдик (" + currentPeriod + ")");
 }
 
@@ -384,6 +429,9 @@ function updateSummaries() {
         return;
     }
 
+    updateFormattedValues();
+    
+
 
 
     restoreFactoryTableHeader(); // восстанавливаем стандартный заголовок таблицы
@@ -399,41 +447,41 @@ function updateSummaries() {
     for (let i = 1; i < json.length; i++) {
         const row = json[i];
         if (!row || row.length < 9 || !row[0]) continue;
-    
+
         if ((row[3] || '').trim() !== selectedCategory) continue;
         if (selectedCompanyType !== "all" && (row[2] || '').trim() !== selectedCompanyType) continue;
-    
+
         const excelDate = row[0];
         const dateCell = new Date((excelDate - 25569) * 86400 * 1000);
         if (isNaN(dateCell)) continue;
-    
+
         const plan = parseFloat(row[6]) || 0;
         const actual = parseFloat(row[7]) || 0;
         const mid = parseFloat(row[8]) || 0;
-    
+
         const rowYear = dateCell.getFullYear();
         const rowMonth = dateCell.getMonth();
         const rowDay = dateCell.getDate();
-    
+
         if (rowYear === lastYear) {
             yearPlan += plan;
             yearActual += actual;
             yearMid += mid;
         }
-    
+
         if (rowYear === lastYear && rowMonth === lastMonth) {
             monthPlan += plan;
             monthActual += actual;
             monthMid += mid;
         }
-    
+
         if (rowYear === lastYear && rowMonth === lastMonth && rowDay === lastDay) {
             dayPlan += plan;
             dayActual += actual;
             dayMid += mid;
         }
     }
-    
+
 
     setPlainValue('day-plan', dayPlan);
     setPlainValue('day-actual', dayActual);
@@ -446,6 +494,8 @@ function updateSummaries() {
     setPlainValue('year-plan', yearPlan);
     setPlainValue('year-actual', yearActual);
     setMidValue('year-mid', yearMid);
+
+    updateFormattedValues();
 }
 
 
@@ -470,6 +520,7 @@ function setMidValue(elementId, value) {
     }
 }
 
+updateFormattedValues();
 
 
 
@@ -503,6 +554,8 @@ document.addEventListener("DOMContentLoaded", () => {
             updateSummaries();
             updateCategorySums();
             al();
+            updateFormattedValues();
+
         })
         .catch(error => {
             alert("Ошибка при загрузке Excel: " + error.message);
@@ -637,7 +690,7 @@ function al() {
                 return num.toFixed(0);
             }
         }
-
+        updateFormattedValues();
         document.getElementById('uzbekneftgazsum').innerText = formatNumber(uzbekneftgazSum);
         document.getElementById('other-sum').innerText = formatNumber(otherSum);
         document.querySelector('.donut .center').innerText = formatNumber(uzbekneftgazSum + otherSum);
@@ -1392,6 +1445,7 @@ function al() {
         button.addEventListener('click', () => {
             const selectedCategory = button.dataset.category;
             updateSummariesWithCategory(selectedCategory);
+            updateFormattedValues();
         });
     });
 
@@ -1463,44 +1517,46 @@ function al() {
     document.querySelectorAll('.checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function () {
             const isActive = this.classList.contains('active');
-    
+
             // Если уже активен — не даём отключить (чтобы всегда один был выбран)
             if (isActive) return;
-    
+
             // Удаляем активность у всех
             document.querySelectorAll('.checkbox').forEach(btn => {
                 btn.classList.remove('active');
                 btn.classList.remove('disabled');
             });
-    
+
             // Делаем текущий активным
             this.classList.add('active');
-    
+
             // Определяем фильтр
             const filterType = this.id;
             selectedCompanyType = (filterType === "summary")
                 ? "all"
                 : (filterType === "neft" ? "Ўзбекнефтгаз" : "Хорижий ва ҚК");
-    
+
             // Обновляем фильтры и расчёты
             resetCompanyFilter();
             applyCompanyFilter(filterType);
             updateSummaries();
             updateCategorySums();
+            updateFormattedValues();
+
         });
     });
-    
-    
-    
-    
+
+
+
+
     // Функция sleep
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    
-    
-    
-    
+
+
+
+
 
 
 
@@ -1617,7 +1673,7 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
             const company = current?.[1];
             const category = current?.[3];
             const value2025 = current?.[7];
-            const value2024 = current?.[5];
+            const value2024 = current?.[6];
 
             const companyMatches = companyFilter === "Общий" || company === companyFilter;
             const categoryMatches = !categoryFilter || category === categoryFilter;
@@ -1645,7 +1701,7 @@ function filterData(companyFilter, categoryFilter, selectedDate = null, startDat
 
 // 📈 Отрисовка графика
 function drawChart({ map2024, map2025, lastFilledDate }) {
-    const chartData = [['Дата', ' ', '2024', { type: 'string', role: 'annotation' }, '2025', { type: 'string', role: 'annotation' }]];
+    const chartData = [['Дата', ' ', 'План', { type: 'string', role: 'annotation' }, 'Факт', { type: 'string', role: 'annotation' }]];
     const dateList = [];
 
     for (let m = 1; m <= 12; m++) {
@@ -1710,7 +1766,7 @@ function drawChart({ map2024, map2025, lastFilledDate }) {
     }
 
     const options = {
-        title: 'Сравнение за 2024 и 2025 гг.',
+        title: 'Сравнение факт и плана 2025 г.',
         curveType: 'function',
         legend: {
             position: 'bottom',
@@ -1736,7 +1792,7 @@ function drawChart({ map2024, map2025, lastFilledDate }) {
             minorGridlines: {
                 color: 'transparent'  // Убрать белые второстепенные линии
             }
-        },        
+        },
         annotations: {
             alwaysOutside: true,
             textStyle: {
