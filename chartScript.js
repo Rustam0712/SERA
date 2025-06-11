@@ -209,19 +209,12 @@ function renderEndOfDayTable() {
         const date = new Date((row[0] - 25569) * 86400 * 1000);
         if (isNaN(date)) continue;
 
-        let match = false;
-        if (currentPeriod === 'day') {
-            match = date.getFullYear() === lastYear &&
-                date.getMonth() === lastMonth &&
-                date.getDate() === lastDay;
-        } else if (currentPeriod === 'month') {
-            match = date.getFullYear() === lastYear &&
-                date.getMonth() === lastMonth;
-        } else if (currentPeriod === 'year') {
-            match = date.getFullYear() === lastYear;
-        }
+        // ⛔ Всегда проверяем только по последнему дню, игнорируем currentPeriod
+        const isSameDay = date.getFullYear() === lastYear &&
+                          date.getMonth() === lastMonth &&
+                          date.getDate() === lastDay;
 
-        if (match) {
+        if (isSameDay) {
             const companyName = row[1]; // колонка B
             const endValue = parseFloat(row[19]) || 0; // колонка T — индекс 19
 
@@ -255,20 +248,27 @@ function renderEndOfDayTable() {
             </tr>
         `;
     }
-    updateFormattedValues();
-    console.log("Таблица обновлена: Кун охирида колдик (" + currentPeriod + ")");
+
+    updateFormattedValues(); // форматируем числа с пробелами
+    console.log("Таблица обновлена: Кун охирида колдик (ТОЛЬКО последний день)");
 }
+
 
 
 
 
 function renderStartOfDayTable() {
     if (selectedCategory !== 'Кун бошида колдик') return;
-    if (!lastFilledDate) return;
 
-    const lastDay = lastFilledDate.getDate();
-    const lastMonth = lastFilledDate.getMonth();
-    const lastYear = lastFilledDate.getFullYear();
+    // Вычисляем нужную дату для сравнения
+    let targetDateStr = "";
+    if (currentPeriod === 'day') {
+        targetDateStr = formatDate(lastFilledDate); // Последний заполненный день
+    } else if (currentPeriod === 'month') {
+        targetDateStr = `01.${String(lastFilledDate.getMonth() + 1).padStart(2, '0')}.2025`;
+    } else if (currentPeriod === 'year') {
+        targetDateStr = "01.01.2025";
+    }
 
     const companyData = {};
 
@@ -276,35 +276,27 @@ function renderStartOfDayTable() {
         const row = json[i];
         if (!row || !row[0]) continue;
 
-        const date = new Date((row[0] - 25569) * 86400 * 1000);
-        if (isNaN(date)) continue;
+        const excelDate = new Date((row[0] - 25569) * 86400 * 1000);
+        const excelDateStr = formatDate(excelDate);
 
-        let match = false;
-        if (currentPeriod === 'day') {
-            match = date.getFullYear() === lastYear &&
-                date.getMonth() === lastMonth &&
-                date.getDate() === lastDay;
-        } else if (currentPeriod === 'month') {
-            match = date.getFullYear() === lastYear &&
-                date.getMonth() === lastMonth;
-        } else if (currentPeriod === 'year') {
-            match = date.getFullYear() === lastYear;
+        if (excelDateStr !== targetDateStr) continue;
+        if (row[3] !== "Ишлаб чиқариш") continue;
+
+        const companyName = row[1];
+        let rawValue = row[18];
+
+        if (!companyName || rawValue === undefined || rawValue === "") continue;
+
+        if (typeof rawValue === "string") {
+            rawValue = rawValue.replace(/\s/g, '').replace(',', '.');
         }
 
-        if (match) {
-            const companyName = row[1]; // колонка B
-            const startValue = parseFloat(row[18]) || 0; // колонка S (индекс 18)
+        const startValue = parseFloat(rawValue) || 0;
 
-            if (companyName) {
-                if (!companyData[companyName]) {
-                    companyData[companyName] = 0;
-                }
-                companyData[companyName] += startValue;
-            }
-        }
+        companyData[companyName] = startValue;
     }
 
-    // Обновляем заголовок таблицы
+    // Обновляем заголовки таблицы
     const tableHead = document.querySelector(".factory-table thead");
     tableHead.innerHTML = `
         <tr>
@@ -325,9 +317,19 @@ function renderStartOfDayTable() {
             </tr>
         `;
     }
+
     updateFormattedValues();
-    console.log("Таблица обновлена: Кун бошида колдик (" + currentPeriod + ")");
+    console.log("✅ Таблица обновлена: Кун бошида колдик за", targetDateStr);
 }
+
+// Утилита для преобразования дат в "ДД.ММ.ГГГГ"
+function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+}
+
 
 function restoreFactoryTableHeader() {
     const tableHead = document.querySelector(".factory-table thead");
